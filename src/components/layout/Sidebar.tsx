@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { LayoutDashboard, Table2, GanttChartSquare, Settings } from "lucide-react";
+import { LayoutDashboard, Table2, GanttChartSquare, Settings, PanelLeftClose } from "lucide-react";
 
 const NAV = [
   { href: "/", label: "Dashboard", icon: LayoutDashboard },
@@ -11,11 +11,20 @@ const NAV = [
   { href: "/settings", label: "Settings", icon: Settings },
 ];
 
-export function Sidebar() {
+export function Sidebar({ onCollapse }: { onCollapse: () => void }) {
   const pathname = usePathname();
   return (
     <nav className="w-56 shrink-0 border-r border-neutral-200 dark:border-neutral-800 p-4 space-y-1">
-      <div className="text-lg font-semibold mb-6 px-2">Roadmap Studio</div>
+      <div className="flex items-center justify-between mb-6 px-2">
+        <span className="text-lg font-semibold">Roadmap Studio</span>
+        <button
+          onClick={onCollapse}
+          title="Hide sidebar"
+          className="p-1 rounded-md text-neutral-400 hover:text-neutral-700 hover:bg-neutral-100 dark:hover:bg-neutral-900 dark:hover:text-neutral-200"
+        >
+          <PanelLeftClose size={16} />
+        </button>
+      </div>
       {NAV.map(({ href, label, icon: Icon }) => {
         const active = pathname === href;
         return (
