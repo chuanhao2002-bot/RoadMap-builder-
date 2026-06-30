@@ -76,7 +76,7 @@ export function TimelineRoadmap() {
                 </div>
               </th>
               <th className="px-3 py-2 text-left font-medium text-neutral-600 dark:text-neutral-300 border-b border-neutral-200 dark:border-neutral-800">
-                KPI
+                Target Goal
               </th>
             </tr>
           </thead>
@@ -121,9 +121,9 @@ export function TimelineRoadmap() {
                     </td>
                     <td className="px-3 py-1">
                       <input
-                        value={project.kpi}
-                        onChange={(e) => updateProject(project.id, { kpi: e.target.value })}
-                        placeholder="Add KPI..."
+                        value={project.targetGoal}
+                        onChange={(e) => updateProject(project.id, { targetGoal: e.target.value })}
+                        placeholder="Add target goal..."
                         className="w-full bg-transparent outline-none"
                       />
                     </td>

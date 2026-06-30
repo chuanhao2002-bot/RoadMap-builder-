@@ -23,7 +23,7 @@ const seedProjects: Omit<Project, "id">[] = [
     endDate: "2026-02-15",
     color: "#3b82f6",
     milestone: false,
-    kpi: "",
+    targetGoal: "",
   },
   {
     name: "AI Search",
@@ -37,7 +37,7 @@ const seedProjects: Omit<Project, "id">[] = [
     endDate: "2026-04-10",
     color: "#a855f7",
     milestone: false,
-    kpi: "",
+    targetGoal: "",
   },
   {
     name: "Payments Overhaul",
@@ -51,7 +51,7 @@ const seedProjects: Omit<Project, "id">[] = [
     endDate: "2026-05-20",
     color: "#f97316",
     milestone: true,
-    kpi: "",
+    targetGoal: "",
   },
 ];
 
@@ -153,7 +153,7 @@ export const useProjectStore = create<ProjectStore>()((set, get) => ({
       endDate: new Date().toISOString().slice(0, 10),
       color: "#64748b",
       milestone: false,
-      kpi: "",
+      targetGoal: "",
       ...p,
     };
     set((s) => ({ projects: [...s.projects, optimistic] }));

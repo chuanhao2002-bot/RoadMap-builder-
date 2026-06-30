@@ -13,7 +13,7 @@ export interface ProjectRow {
   end_date: string | null;
   color: string | null;
   milestone: boolean;
-  kpi: string | null;
+  target_goal: string | null;
 }
 
 export function rowToProject(row: ProjectRow): Project {
@@ -30,7 +30,7 @@ export function rowToProject(row: ProjectRow): Project {
     endDate: row.end_date ?? "",
     color: row.color ?? "#64748b",
     milestone: row.milestone,
-    kpi: row.kpi ?? "",
+    targetGoal: row.target_goal ?? "",
   };
 }
 
@@ -47,6 +47,6 @@ export function projectToRow(p: Partial<Project>) {
   if (p.endDate !== undefined) row.end_date = p.endDate || null;
   if (p.color !== undefined) row.color = p.color;
   if (p.milestone !== undefined) row.milestone = p.milestone;
-  if (p.kpi !== undefined) row.kpi = p.kpi;
+  if (p.targetGoal !== undefined) row.target_goal = p.targetGoal;
   return row;
 }

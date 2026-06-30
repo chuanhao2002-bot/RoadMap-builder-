@@ -14,7 +14,7 @@ export interface Project {
   endDate: string; // ISO date
   color: string;
   milestone: boolean;
-  kpi: string;
+  targetGoal: string;
 }
 
 export const PROJECT_COLUMNS: { key: keyof Project; label: string }[] = [
@@ -29,5 +29,5 @@ export const PROJECT_COLUMNS: { key: keyof Project; label: string }[] = [
   { key: "endDate", label: "End Date" },
   { key: "color", label: "Color" },
   { key: "milestone", label: "Milestone" },
-  { key: "kpi", label: "KPI" },
+  { key: "targetGoal", label: "Target Goal" },
 ];
