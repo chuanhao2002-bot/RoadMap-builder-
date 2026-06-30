@@ -45,8 +45,8 @@ Budget-APP repo. It does not share code with the budget app.
   signed-in account.
 - **Auth + persistence**: email magic-link sign-in (`AuthGate`); projects and
   saved views are stored in Supabase Postgres under RLS policies scoped to
-  `auth.uid()`, with Zustand as a local cache and a Realtime subscription on
-  `projects` keeping it in sync across tabs/sessions.
+  `auth.uid()`, with Zustand as a local cache and Realtime subscriptions on
+  both `projects` and `saved_views` keeping them in sync across tabs/sessions.
 
 ## Setup
 
@@ -67,6 +67,26 @@ Then run `supabase/migrations/0001_init.sql` once in the Supabase project's
 SQL Editor to create the `projects` and `saved_views` tables, RLS policies,
 and `updated_at` triggers.
 
+## Deploy (Vercel)
+
+1. Push this repo to GitHub (already done for this branch).
+2. In the Vercel dashboard: **New Project** → import the repo → set **Root
+   Directory** to `roadmap-studio` (it's a subdirectory of the monorepo, not
+   the repo root). Framework is auto-detected as Next.js.
+3. Add environment variables in the Vercel project settings (Settings →
+   Environment Variables) — these are gitignored locally, so they must be
+   entered manually, not copied from a committed file:
+   ```
+   NEXT_PUBLIC_SUPABASE_URL=...
+   NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY=...
+   ```
+4. In Supabase Auth settings (Authentication → URL Configuration), add the
+   Vercel production URL and any preview-deployment URL pattern
+   (`https://*.vercel.app`) to the allowed redirect URLs — magic-link sign-in
+   uses `emailRedirectTo: window.location.origin` (see `AuthGate.tsx`), so
+   links won't redirect correctly in production until this is set.
+5. Deploy. Vercel rebuilds automatically on pushes to the connected branch.
+
 ## Known gaps vs. the full spec
 
 This scaffold covers one view (Timeline) and the core spreadsheet → roadmap
@@ -85,4 +105,8 @@ order of value:
 3. ~~Filters + saved views~~ — done.
 4. ~~Presentation mode~~ — done (no presenter notes/timer/laser pointer yet).
 5. ~~PDF/SVG export~~ — done.
-6. Realtime collaboration via Supabase Realtime once the backend exists.
+6. ~~Realtime collaboration~~ — done: Realtime subscriptions on `projects`
+   and `saved_views` keep the local Zustand cache in sync across tabs/
+   sessions for the same signed-in user. True multi-user collaboration
+   (presence, shared roadmaps across accounts, live cursors) is still future
+   work, gated on team/org sharing (see item 1's RLS note).

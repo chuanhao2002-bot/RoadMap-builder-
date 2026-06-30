@@ -10,6 +10,8 @@ interface SavedViewRow {
   filters: ProjectFilters;
 }
 
+let savedViewsRealtimeUnsubscribe: (() => void) | null = null;
+
 interface FilterStore {
   filters: ProjectFilters;
   activeSavedViewId: string | null;
@@ -34,6 +36,7 @@ export const useFilterStore = create<FilterStore>()((set, get) => ({
 
   init: async (userId) => {
     if (get().userId === userId && get().loaded) return;
+    savedViewsRealtimeUnsubscribe?.();
     set({ userId, loaded: false, savedViews: [] });
 
     const supabase = createClient();
@@ -50,9 +53,44 @@ export const useFilterStore = create<FilterStore>()((set, get) => ({
 
     const rows = (data ?? []) as SavedViewRow[];
     set({ savedViews: rows.map((r) => ({ id: r.id, name: r.name, filters: r.filters })), loaded: true });
+
+    const channel = supabase
+      .channel(`saved-views-${userId}`)
+      .on(
+        "postgres_changes",
+        { event: "*", schema: "public", table: "saved_views", filter: `user_id=eq.${userId}` },
+        (payload) => {
+          set((s) => {
+            if (payload.eventType === "DELETE") {
+              const deletedId = (payload.old as SavedViewRow).id;
+              return {
+                savedViews: s.savedViews.filter((v) => v.id !== deletedId),
+                activeSavedViewId: s.activeSavedViewId === deletedId ? null : s.activeSavedViewId,
+              };
+            }
+            const row = payload.new as SavedViewRow;
+            const incoming: SavedView = { id: row.id, name: row.name, filters: row.filters };
+            const exists = s.savedViews.some((v) => v.id === incoming.id);
+            return {
+              savedViews: exists
+                ? s.savedViews.map((v) => (v.id === incoming.id ? incoming : v))
+                : [...s.savedViews, incoming],
+            };
+          });
+        }
+      )
+      .subscribe();
+
+    savedViewsRealtimeUnsubscribe = () => {
+      supabase.removeChannel(channel);
+    };
   },
 
-  reset: () => set({ savedViews: [], userId: null, loaded: false, filters: EMPTY_FILTERS, activeSavedViewId: null }),
+  reset: () => {
+    savedViewsRealtimeUnsubscribe?.();
+    savedViewsRealtimeUnsubscribe = null;
+    set({ savedViews: [], userId: null, loaded: false, filters: EMPTY_FILTERS, activeSavedViewId: null });
+  },
 
   setFilters: (patch) =>
     set((s) => ({ filters: { ...s.filters, ...patch }, activeSavedViewId: null })),
