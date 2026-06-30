@@ -3,55 +3,16 @@
 import { useMemo, useRef } from "react";
 import { useProjectStore } from "@/store/useProjectStore";
 import { toPng } from "html-to-image";
-
-const DAY_WIDTH = 6;
-const ROW_HEIGHT = 44;
-const LEFT_PADDING = 16;
-const TOP_PADDING = 40;
-
-function daysBetween(a: Date, b: Date) {
-  return Math.round((b.getTime() - a.getTime()) / 86400000);
-}
+import { computeTimelineLayout, ROW_HEIGHT } from "@/lib/timelineLayout";
 
 export function TimelineRoadmap() {
   const { projects } = useProjectStore();
   const containerRef = useRef<HTMLDivElement>(null);
 
-  const { rows, totalWidth, totalHeight, months } = useMemo(() => {
-    if (projects.length === 0) {
-      return { rows: [], minDate: new Date(), totalWidth: 0, totalHeight: 0, months: [] };
-    }
-    const starts = projects.map((p) => new Date(p.startDate));
-    const ends = projects.map((p) => new Date(p.endDate));
-    const minDate = new Date(Math.min(...starts.map((d) => d.getTime())));
-    minDate.setDate(1);
-    const maxDate = new Date(Math.max(...ends.map((d) => d.getTime())));
-
-    const rows = projects.map((p, i) => {
-      const start = new Date(p.startDate);
-      const end = new Date(p.endDate);
-      const x = LEFT_PADDING + daysBetween(minDate, start) * DAY_WIDTH;
-      const width = Math.max(daysBetween(start, end) * DAY_WIDTH, 24);
-      const y = TOP_PADDING + i * ROW_HEIGHT;
-      return { project: p, x, y, width };
-    });
-
-    const totalDays = daysBetween(minDate, maxDate) + 30;
-    const totalWidth = LEFT_PADDING * 2 + totalDays * DAY_WIDTH;
-    const totalHeight = TOP_PADDING + projects.length * ROW_HEIGHT + 20;
-
-    const months: { x: number; label: string }[] = [];
-    const cursor = new Date(minDate);
-    while (cursor <= maxDate) {
-      months.push({
-        x: LEFT_PADDING + daysBetween(minDate, cursor) * DAY_WIDTH,
-        label: cursor.toLocaleDateString("en-US", { month: "short", year: "numeric" }),
-      });
-      cursor.setMonth(cursor.getMonth() + 1);
-    }
-
-    return { rows, minDate, totalWidth, totalHeight, months };
-  }, [projects]);
+  const { rows, totalWidth, totalHeight, months } = useMemo(
+    () => computeTimelineLayout(projects),
+    [projects]
+  );
 
   const exportPng = async () => {
     if (!containerRef.current) return;
