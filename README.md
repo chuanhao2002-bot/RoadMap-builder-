@@ -20,9 +20,20 @@ Budget-APP repo. It does not share code with the budget app.
 - **Projects spreadsheet** (`/projects`): editable grid (name, description,
   category, department, owner, status, priority, progress, dates, color,
   milestone, tags). Add/duplicate/delete rows.
-- **Timeline view** (`/views`): SVG Gantt-style roadmap auto-generated from
-  the spreadsheet — bar position/width derived from dates, progress fill,
-  milestone flags, month gridlines. PNG export button.
+- **Timeline / Swimlane / Kanban views** (`/views`): SVG Gantt-style roadmap,
+  grouped lanes (by department/category/owner/status/priority), and a
+  drag-and-drop status board — all auto-generated from the spreadsheet via
+  `src/lib/timelineLayout.ts`. PNG export on Timeline/Swimlane.
+- **Filters + saved views**: search and multi-select filters (status,
+  priority, department, category, owner, date range) via `FilterBar`,
+  applied everywhere through `useFilteredProjects()`. Filter sets can be
+  named, saved, and re-applied (`useFilterStore`, persisted).
+- **Presentation mode** (`/present`): fullscreen, sidebar-free view of the
+  roadmap with a Timeline/Swimlane/Kanban switcher, fullscreen + dark mode
+  toggles, keyboard shortcuts (←/→ or 1/2/3 to switch views, `f` for
+  fullscreen, `Esc` to exit), and auto-hiding controls. Reachable via the
+  "Present" button on `/views`. Presenter notes, timer, and laser pointer
+  are not implemented.
 - **Dashboard** (`/`): project counts by status, recently edited list, quick
   links.
 - **Settings** (`/settings`): placeholder for Supabase env vars.
@@ -54,13 +65,10 @@ order of value:
 
 1. Wire Supabase: schema for projects/views/orgs, auth, RLS, replace the
    Zustand-only store with a Supabase-backed one (keep Zustand as the local
-   cache layer).
-2. Add Swimlane and Kanban views (straightforward reuse of the same data
-   model, different layout function).
-3. Filters + saved views (client-side filtering of the existing project list,
-   persisted as named filter sets).
-4. Presentation mode (a route that hides the sidebar/toolbar and renders only
-   the active view fullscreen).
+   cache layer). Needs real Supabase credentials.
+2. ~~Add Swimlane and Kanban views~~ — done.
+3. ~~Filters + saved views~~ — done.
+4. ~~Presentation mode~~ — done (no presenter notes/timer/laser pointer yet).
 5. PDF/SVG export alongside the existing PNG export (`jsPDF` is already
    installed).
 6. Realtime collaboration via Supabase Realtime once the backend exists.

@@ -5,6 +5,8 @@ import { TimelineRoadmap } from "@/components/roadmap/TimelineRoadmap";
 import { SwimlaneRoadmap } from "@/components/roadmap/SwimlaneRoadmap";
 import { KanbanBoard } from "@/components/roadmap/KanbanBoard";
 import { FilterBar } from "@/components/filters/FilterBar";
+import Link from "next/link";
+import { Presentation } from "lucide-react";
 
 const TABS = [
   { id: "timeline", label: "Timeline" },
@@ -19,7 +21,15 @@ export default function ViewsPage() {
 
   return (
     <div className="space-y-4">
-      <h1 className="text-2xl font-semibold">Views</h1>
+      <div className="flex items-center justify-between">
+        <h1 className="text-2xl font-semibold">Views</h1>
+        <Link
+          href="/present"
+          className="flex items-center gap-2 rounded-md bg-neutral-900 text-white dark:bg-white dark:text-neutral-900 px-3 py-1.5 text-sm font-medium"
+        >
+          <Presentation size={14} /> Present
+        </Link>
+      </div>
       <p className="text-sm text-neutral-500">
         Auto-generated from the Projects spreadsheet. No manual positioning.
       </p>
