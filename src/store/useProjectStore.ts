@@ -1,16 +1,16 @@
 "use client";
 
 import { create } from "zustand";
-import { persist } from "zustand/middleware";
+import { createClient } from "@/lib/supabase";
+import { projectToRow, rowToProject, type ProjectRow } from "@/lib/projectMapper";
 import type { Project } from "@/types/project";
 
 function id() {
   return Math.random().toString(36).slice(2, 10);
 }
 
-const seedProjects: Project[] = [
+const seedProjects: Omit<Project, "id">[] = [
   {
-    id: id(),
     name: "Login Redesign",
     description: "Modernize authentication flow",
     category: "Product",
@@ -26,7 +26,6 @@ const seedProjects: Project[] = [
     tags: ["auth", "ux"],
   },
   {
-    id: id(),
     name: "AI Search",
     description: "Semantic search across roadmap data",
     category: "Product",
@@ -42,7 +41,6 @@ const seedProjects: Project[] = [
     tags: ["ai", "search"],
   },
   {
-    id: id(),
     name: "Payments Overhaul",
     description: "Migrate billing to new provider",
     category: "Infrastructure",
@@ -59,54 +57,181 @@ const seedProjects: Project[] = [
   },
 ];
 
+let realtimeUnsubscribe: (() => void) | null = null;
+
 interface ProjectStore {
   projects: Project[];
+  userId: string | null;
+  loaded: boolean;
+  init: (userId: string) => Promise<void>;
+  reset: () => void;
   addProject: (p?: Partial<Project>) => void;
   updateProject: (id: string, patch: Partial<Project>) => void;
   removeProject: (id: string) => void;
   duplicateProject: (id: string) => void;
 }
 
-export const useProjectStore = create<ProjectStore>()(
-  persist(
-    (set) => ({
-      projects: seedProjects,
-      addProject: (p) =>
+export const useProjectStore = create<ProjectStore>()((set, get) => ({
+  projects: [],
+  userId: null,
+  loaded: false,
+
+  init: async (userId) => {
+    if (get().userId === userId && get().loaded) return;
+    realtimeUnsubscribe?.();
+    set({ userId, loaded: false, projects: [] });
+
+    const supabase = createClient();
+    const { data, error } = await supabase
+      .from("projects")
+      .select("*")
+      .order("created_at", { ascending: true });
+
+    if (error) {
+      console.error("Failed to load projects", error);
+      set({ loaded: true });
+      return;
+    }
+
+    let rows = (data ?? []) as ProjectRow[];
+
+    if (rows.length === 0) {
+      const { data: inserted, error: insertError } = await supabase
+        .from("projects")
+        .insert(seedProjects.map((p) => ({ ...projectToRow(p), user_id: userId })))
+        .select("*");
+      if (insertError) {
+        console.error("Failed to seed projects", insertError);
+      } else {
+        rows = (inserted ?? []) as ProjectRow[];
+      }
+    }
+
+    set({ projects: rows.map(rowToProject), loaded: true });
+
+    const channel = supabase
+      .channel(`projects-${userId}`)
+      .on(
+        "postgres_changes",
+        { event: "*", schema: "public", table: "projects", filter: `user_id=eq.${userId}` },
+        (payload) => {
+          set((s) => {
+            if (payload.eventType === "DELETE") {
+              return { projects: s.projects.filter((p) => p.id !== (payload.old as ProjectRow).id) };
+            }
+            const incoming = rowToProject(payload.new as ProjectRow);
+            const exists = s.projects.some((p) => p.id === incoming.id);
+            return {
+              projects: exists
+                ? s.projects.map((p) => (p.id === incoming.id ? incoming : p))
+                : [...s.projects, incoming],
+            };
+          });
+        }
+      )
+      .subscribe();
+
+    realtimeUnsubscribe = () => {
+      supabase.removeChannel(channel);
+    };
+  },
+
+  reset: () => {
+    realtimeUnsubscribe?.();
+    realtimeUnsubscribe = null;
+    set({ projects: [], userId: null, loaded: false });
+  },
+
+  addProject: (p) => {
+    const userId = get().userId;
+    if (!userId) return;
+    const optimistic: Project = {
+      id: id(),
+      name: "New Project",
+      description: "",
+      category: "",
+      department: "",
+      owner: "",
+      status: "Planning",
+      priority: "Medium",
+      progress: 0,
+      startDate: new Date().toISOString().slice(0, 10),
+      endDate: new Date().toISOString().slice(0, 10),
+      color: "#64748b",
+      milestone: false,
+      tags: [],
+      ...p,
+    };
+    set((s) => ({ projects: [...s.projects, optimistic] }));
+
+    const supabase = createClient();
+    supabase
+      .from("projects")
+      .insert({ ...projectToRow(optimistic), user_id: userId })
+      .select("*")
+      .single()
+      .then(({ data, error }) => {
+        if (error) {
+          console.error("Failed to add project", error);
+          set((s) => ({ projects: s.projects.filter((proj) => proj.id !== optimistic.id) }));
+          return;
+        }
+        const saved = rowToProject(data as ProjectRow);
         set((s) => ({
-          projects: [
-            ...s.projects,
-            {
-              id: id(),
-              name: "New Project",
-              description: "",
-              category: "",
-              department: "",
-              owner: "",
-              status: "Planning",
-              priority: "Medium",
-              progress: 0,
-              startDate: new Date().toISOString().slice(0, 10),
-              endDate: new Date().toISOString().slice(0, 10),
-              color: "#64748b",
-              milestone: false,
-              tags: [],
-              ...p,
-            },
-          ],
-        })),
-      updateProject: (id, patch) =>
+          projects: s.projects.map((proj) => (proj.id === optimistic.id ? saved : proj)),
+        }));
+      });
+  },
+
+  updateProject: (projectId, patch) => {
+    set((s) => ({
+      projects: s.projects.map((p) => (p.id === projectId ? { ...p, ...patch } : p)),
+    }));
+    const supabase = createClient();
+    supabase
+      .from("projects")
+      .update(projectToRow(patch))
+      .eq("id", projectId)
+      .then(({ error }) => {
+        if (error) console.error("Failed to update project", error);
+      });
+  },
+
+  removeProject: (projectId) => {
+    set((s) => ({ projects: s.projects.filter((p) => p.id !== projectId) }));
+    const supabase = createClient();
+    supabase
+      .from("projects")
+      .delete()
+      .eq("id", projectId)
+      .then(({ error }) => {
+        if (error) console.error("Failed to remove project", error);
+      });
+  },
+
+  duplicateProject: (projectId) => {
+    const userId = get().userId;
+    const target = get().projects.find((p) => p.id === projectId);
+    if (!userId || !target) return;
+    const copy: Project = { ...target, id: id(), name: `${target.name} (copy)` };
+    set((s) => ({ projects: [...s.projects, copy] }));
+
+    const supabase = createClient();
+    supabase
+      .from("projects")
+      .insert({ ...projectToRow(copy), user_id: userId })
+      .select("*")
+      .single()
+      .then(({ data, error }) => {
+        if (error) {
+          console.error("Failed to duplicate project", error);
+          set((s) => ({ projects: s.projects.filter((p) => p.id !== copy.id) }));
+          return;
+        }
+        const saved = rowToProject(data as ProjectRow);
         set((s) => ({
-          projects: s.projects.map((p) => (p.id === id ? { ...p, ...patch } : p)),
-        })),
-      removeProject: (id) =>
-        set((s) => ({ projects: s.projects.filter((p) => p.id !== id) })),
-      duplicateProject: (projectId) =>
-        set((s) => {
-          const target = s.projects.find((p) => p.id === projectId);
-          if (!target) return s;
-          return { projects: [...s.projects, { ...target, id: id(), name: `${target.name} (copy)` }] };
-        }),
-    }),
-    { name: "roadmap-studio-projects" }
-  )
-);
+          projects: s.projects.map((p) => (p.id === copy.id ? saved : p)),
+        }));
+      });
+  },
+}));

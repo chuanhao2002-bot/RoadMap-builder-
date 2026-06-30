@@ -2,7 +2,8 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { LayoutDashboard, Table2, GanttChartSquare, Settings } from "lucide-react";
+import { LayoutDashboard, Table2, GanttChartSquare, Settings, LogOut } from "lucide-react";
+import { createClient } from "@/lib/supabase";
 
 const NAV = [
   { href: "/", label: "Dashboard", icon: LayoutDashboard },
@@ -33,6 +34,13 @@ export function Sidebar() {
           </Link>
         );
       })}
+      <button
+        onClick={() => createClient().auth.signOut()}
+        className="flex w-full items-center gap-2 rounded-md px-3 py-2 text-sm text-neutral-600 dark:text-neutral-300 hover:bg-neutral-100 dark:hover:bg-neutral-900"
+      >
+        <LogOut size={16} />
+        Sign out
+      </button>
     </nav>
   );
 }

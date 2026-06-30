@@ -9,10 +9,12 @@ Budget-APP repo. It does not share code with the budget app.
 ## Stack
 
 - Next.js (App Router) + TypeScript + Tailwind CSS
-- Zustand (`src/store/useProjectStore.ts`) holds project data, persisted to
-  `localStorage` for now
-- Supabase client helper at `src/lib/supabase.ts`, not yet wired to a real
-  project (no auth, no realtime sync, no RLS schema yet)
+- Zustand (`src/store/useProjectStore.ts`, `src/store/useFilterStore.ts`) is
+  the local cache layer; data is persisted to Supabase Postgres (projects,
+  saved views), scoped per-user via RLS, with a Realtime subscription
+  keeping the cache in sync
+- Supabase client helper at `src/lib/supabase.ts`; auth via email magic link
+  (`src/components/auth/AuthGate.tsx`)
 - `html-to-image` + `jsPDF` for PNG/SVG/PDF export of the roadmap (`src/lib/exportRoadmap.ts`)
 
 ## What's implemented
@@ -39,7 +41,12 @@ Budget-APP repo. It does not share code with the budget app.
   are not implemented.
 - **Dashboard** (`/`): project counts by status, recently edited list, quick
   links.
-- **Settings** (`/settings`): placeholder for Supabase env vars.
+- **Settings** (`/settings`): shows Supabase connection status and the
+  signed-in account.
+- **Auth + persistence**: email magic-link sign-in (`AuthGate`); projects and
+  saved views are stored in Supabase Postgres under RLS policies scoped to
+  `auth.uid()`, with Zustand as a local cache and a Realtime subscription on
+  `projects` keeping it in sync across tabs/sessions.
 
 ## Setup
 
@@ -49,12 +56,16 @@ npm install
 npm run dev
 ```
 
-To connect a real backend later, create `.env.local`:
+Create `.env.local`:
 
 ```
 NEXT_PUBLIC_SUPABASE_URL=...
-NEXT_PUBLIC_SUPABASE_ANON_KEY=...
+NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY=...
 ```
+
+Then run `supabase/migrations/0001_init.sql` once in the Supabase project's
+SQL Editor to create the `projects` and `saved_views` tables, RLS policies,
+and `updated_at` triggers.
 
 ## Known gaps vs. the full spec
 
@@ -66,9 +77,10 @@ Notion/Slack/etc., RBAC, version history). None of that is implemented — it
 would be a multi-week effort per area. Suggested next milestones, roughly in
 order of value:
 
-1. Wire Supabase: schema for projects/views/orgs, auth, RLS, replace the
-   Zustand-only store with a Supabase-backed one (keep Zustand as the local
-   cache layer). Needs real Supabase credentials.
+1. ~~Wire Supabase~~ — done: schema for projects/saved_views, RLS, magic-link
+   auth, Zustand as local cache over a Supabase-backed store. No team/org
+   sharing yet (single-tenant-per-user RLS model) — that's future work
+   alongside RBAC.
 2. ~~Add Swimlane and Kanban views~~ — done.
 3. ~~Filters + saved views~~ — done.
 4. ~~Presentation mode~~ — done (no presenter notes/timer/laser pointer yet).
