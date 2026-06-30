@@ -4,6 +4,7 @@ import { create } from "zustand";
 import { createClient } from "@/lib/supabase";
 import { projectToRow, rowToProject, type ProjectRow } from "@/lib/projectMapper";
 import type { Project } from "@/types/project";
+import { useToastStore } from "@/store/useToastStore";
 
 function id() {
   return Math.random().toString(36).slice(2, 10);
@@ -90,6 +91,7 @@ export const useProjectStore = create<ProjectStore>()((set, get) => ({
 
     if (error) {
       console.error("Failed to load projects", error);
+      useToastStore.getState().push("Could not load projects — check your connection and reload.");
       set({ loaded: true });
       return;
     }
@@ -173,6 +175,7 @@ export const useProjectStore = create<ProjectStore>()((set, get) => ({
       .then(({ data, error }) => {
         if (error) {
           console.error("Failed to add project", error);
+          useToastStore.getState().push("Failed to save new project — it was not persisted.");
           set((s) => ({ projects: s.projects.filter((proj) => proj.id !== optimistic.id) }));
           return;
         }
@@ -184,6 +187,7 @@ export const useProjectStore = create<ProjectStore>()((set, get) => ({
   },
 
   updateProject: (projectId, patch) => {
+    const previous = get().projects.find((p) => p.id === projectId);
     set((s) => ({
       projects: s.projects.map((p) => (p.id === projectId ? { ...p, ...patch } : p)),
     }));
@@ -193,11 +197,20 @@ export const useProjectStore = create<ProjectStore>()((set, get) => ({
       .update(projectToRow(patch))
       .eq("id", projectId)
       .then(({ error }) => {
-        if (error) console.error("Failed to update project", error);
+        if (error) {
+          console.error("Failed to update project", error);
+          useToastStore.getState().push("Failed to save your change — it was not persisted.");
+          if (previous) {
+            set((s) => ({
+              projects: s.projects.map((p) => (p.id === projectId ? previous : p)),
+            }));
+          }
+        }
       });
   },
 
   removeProject: (projectId) => {
+    const previous = get().projects;
     set((s) => ({ projects: s.projects.filter((p) => p.id !== projectId) }));
     const supabase = createClient();
     supabase
@@ -205,7 +218,11 @@ export const useProjectStore = create<ProjectStore>()((set, get) => ({
       .delete()
       .eq("id", projectId)
       .then(({ error }) => {
-        if (error) console.error("Failed to remove project", error);
+        if (error) {
+          console.error("Failed to remove project", error);
+          useToastStore.getState().push("Failed to delete project — it was not removed.");
+          set({ projects: previous });
+        }
       });
   },
 
@@ -224,6 +241,7 @@ export const useProjectStore = create<ProjectStore>()((set, get) => ({
       .then(({ data, error }) => {
         if (error) {
           console.error("Failed to duplicate project", error);
+          useToastStore.getState().push("Failed to save duplicated project — it was not persisted.");
           set((s) => ({ projects: s.projects.filter((p) => p.id !== copy.id) }));
           return;
         }

@@ -3,6 +3,7 @@
 import { create } from "zustand";
 import { createClient } from "@/lib/supabase";
 import { EMPTY_FILTERS, type ProjectFilters, type SavedView } from "@/types/filters";
+import { useToastStore } from "@/store/useToastStore";
 
 interface SavedViewRow {
   id: string;
@@ -45,6 +46,7 @@ export const useFilterStore = create<FilterStore>()((set, get) => ({
 
     if (error) {
       console.error("Failed to load saved views", error);
+      useToastStore.getState().push("Could not load saved views — check your connection and reload.");
       set({ loaded: true });
       return;
     }
@@ -106,6 +108,7 @@ export const useFilterStore = create<FilterStore>()((set, get) => ({
       .then(({ data, error }) => {
         if (error || !data) {
           console.error("Failed to save view", error);
+          useToastStore.getState().push("Failed to save view — it was not persisted.");
           return;
         }
         const row = data as SavedViewRow;
@@ -121,6 +124,8 @@ export const useFilterStore = create<FilterStore>()((set, get) => ({
   },
 
   deleteSavedView: (viewId) => {
+    const previousViews = get().savedViews;
+    const previousActiveId = get().activeSavedViewId;
     set((s) => ({
       savedViews: s.savedViews.filter((v) => v.id !== viewId),
       activeSavedViewId: s.activeSavedViewId === viewId ? null : s.activeSavedViewId,
@@ -131,7 +136,11 @@ export const useFilterStore = create<FilterStore>()((set, get) => ({
       .delete()
       .eq("id", viewId)
       .then(({ error }) => {
-        if (error) console.error("Failed to delete saved view", error);
+        if (error) {
+          console.error("Failed to delete saved view", error);
+          useToastStore.getState().push("Failed to delete view — it was not removed.");
+          set({ savedViews: previousViews, activeSavedViewId: previousActiveId });
+        }
       });
   },
 }));
