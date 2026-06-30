@@ -1,6 +1,7 @@
 "use client";
 
 import { useProjectStore } from "@/store/useProjectStore";
+import { useFilteredProjects } from "@/lib/useFilteredProjects";
 import { PROJECT_COLUMNS, type Project, type ProjectStatus, type ProjectPriority } from "@/types/project";
 import { Plus, Copy, Trash2 } from "lucide-react";
 
@@ -8,7 +9,8 @@ const STATUSES: ProjectStatus[] = ["Planning", "In Progress", "Blocked", "Comple
 const PRIORITIES: ProjectPriority[] = ["Low", "Medium", "High", "Critical"];
 
 export function ProjectSheet() {
-  const { projects, updateProject, addProject, removeProject, duplicateProject } = useProjectStore();
+  const { updateProject, addProject, removeProject, duplicateProject } = useProjectStore();
+  const projects = useFilteredProjects();
 
   return (
     <div className="overflow-auto rounded-lg border border-neutral-200 dark:border-neutral-800">

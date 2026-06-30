@@ -1,4 +1,5 @@
 import { ProjectSheet } from "@/components/spreadsheet/ProjectSheet";
+import { FilterBar } from "@/components/filters/FilterBar";
 
 export default function ProjectsPage() {
   return (
@@ -7,6 +8,7 @@ export default function ProjectsPage() {
       <p className="text-sm text-neutral-500">
         Edit data here. Every roadmap view updates automatically.
       </p>
+      <FilterBar />
       <ProjectSheet />
     </div>
   );

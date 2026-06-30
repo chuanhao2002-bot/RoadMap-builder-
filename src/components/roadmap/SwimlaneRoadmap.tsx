@@ -1,7 +1,7 @@
 "use client";
 
 import { useMemo, useRef, useState } from "react";
-import { useProjectStore } from "@/store/useProjectStore";
+import { useFilteredProjects } from "@/lib/useFilteredProjects";
 import { toPng } from "html-to-image";
 import { computeTimelineLayout, groupBy, ROW_HEIGHT, LEFT_PADDING } from "@/lib/timelineLayout";
 import type { Project } from "@/types/project";
@@ -17,7 +17,7 @@ const GROUP_FIELDS: { key: keyof Project; label: string }[] = [
 const LANE_HEADER_HEIGHT = 28;
 
 export function SwimlaneRoadmap() {
-  const { projects } = useProjectStore();
+  const projects = useFilteredProjects();
   const containerRef = useRef<HTMLDivElement>(null);
   const [groupField, setGroupField] = useState<keyof Project>("department");
 

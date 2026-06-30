@@ -2,12 +2,14 @@
 
 import { useState } from "react";
 import { useProjectStore } from "@/store/useProjectStore";
+import { useFilteredProjects } from "@/lib/useFilteredProjects";
 import type { Project, ProjectStatus } from "@/types/project";
 
 const COLUMNS: ProjectStatus[] = ["Planning", "In Progress", "Blocked", "Completed"];
 
 export function KanbanBoard() {
-  const { projects, updateProject } = useProjectStore();
+  const { updateProject } = useProjectStore();
+  const projects = useFilteredProjects();
   const [dragOverColumn, setDragOverColumn] = useState<ProjectStatus | null>(null);
 
   const handleDrop = (status: ProjectStatus, e: React.DragEvent) => {

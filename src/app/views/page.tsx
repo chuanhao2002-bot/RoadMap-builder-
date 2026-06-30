@@ -4,6 +4,7 @@ import { useState } from "react";
 import { TimelineRoadmap } from "@/components/roadmap/TimelineRoadmap";
 import { SwimlaneRoadmap } from "@/components/roadmap/SwimlaneRoadmap";
 import { KanbanBoard } from "@/components/roadmap/KanbanBoard";
+import { FilterBar } from "@/components/filters/FilterBar";
 
 const TABS = [
   { id: "timeline", label: "Timeline" },
@@ -22,6 +23,8 @@ export default function ViewsPage() {
       <p className="text-sm text-neutral-500">
         Auto-generated from the Projects spreadsheet. No manual positioning.
       </p>
+
+      <FilterBar />
 
       <div className="flex gap-1 border-b border-neutral-200 dark:border-neutral-800">
         {TABS.map((t) => (

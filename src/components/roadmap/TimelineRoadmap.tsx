@@ -1,12 +1,12 @@
 "use client";
 
 import { useMemo, useRef } from "react";
-import { useProjectStore } from "@/store/useProjectStore";
+import { useFilteredProjects } from "@/lib/useFilteredProjects";
 import { toPng } from "html-to-image";
 import { computeTimelineLayout, ROW_HEIGHT } from "@/lib/timelineLayout";
 
 export function TimelineRoadmap() {
-  const { projects } = useProjectStore();
+  const projects = useFilteredProjects();
   const containerRef = useRef<HTMLDivElement>(null);
 
   const { rows, totalWidth, totalHeight, months } = useMemo(
