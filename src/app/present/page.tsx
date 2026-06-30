@@ -1,10 +1,11 @@
 import { PresentationMode } from "@/components/presentation/PresentationMode";
-import { AuthGate } from "@/components/auth/AuthGate";
+import { StoreInit } from "@/components/StoreInit";
 
 export default function PresentPage() {
   return (
-    <AuthGate>
+    <>
+      <StoreInit />
       <PresentationMode />
-    </AuthGate>
+    </>
   );
 }

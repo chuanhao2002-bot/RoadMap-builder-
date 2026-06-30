@@ -61,9 +61,8 @@ let realtimeUnsubscribe: (() => void) | null = null;
 
 interface ProjectStore {
   projects: Project[];
-  userId: string | null;
   loaded: boolean;
-  init: (userId: string) => Promise<void>;
+  init: () => Promise<void>;
   reset: () => void;
   addProject: (p?: Partial<Project>) => void;
   updateProject: (id: string, patch: Partial<Project>) => void;
@@ -73,13 +72,12 @@ interface ProjectStore {
 
 export const useProjectStore = create<ProjectStore>()((set, get) => ({
   projects: [],
-  userId: null,
   loaded: false,
 
-  init: async (userId) => {
-    if (get().userId === userId && get().loaded) return;
+  init: async () => {
+    if (get().loaded) return;
     realtimeUnsubscribe?.();
-    set({ userId, loaded: false, projects: [] });
+    set({ loaded: false, projects: [] });
 
     const supabase = createClient();
     const { data, error } = await supabase
@@ -98,7 +96,7 @@ export const useProjectStore = create<ProjectStore>()((set, get) => ({
     if (rows.length === 0) {
       const { data: inserted, error: insertError } = await supabase
         .from("projects")
-        .insert(seedProjects.map((p) => ({ ...projectToRow(p), user_id: userId })))
+        .insert(seedProjects.map((p) => projectToRow(p)))
         .select("*");
       if (insertError) {
         console.error("Failed to seed projects", insertError);
@@ -110,10 +108,10 @@ export const useProjectStore = create<ProjectStore>()((set, get) => ({
     set({ projects: rows.map(rowToProject), loaded: true });
 
     const channel = supabase
-      .channel(`projects-${userId}`)
+      .channel("projects-shared")
       .on(
         "postgres_changes",
-        { event: "*", schema: "public", table: "projects", filter: `user_id=eq.${userId}` },
+        { event: "*", schema: "public", table: "projects" },
         (payload) => {
           set((s) => {
             if (payload.eventType === "DELETE") {
@@ -139,12 +137,10 @@ export const useProjectStore = create<ProjectStore>()((set, get) => ({
   reset: () => {
     realtimeUnsubscribe?.();
     realtimeUnsubscribe = null;
-    set({ projects: [], userId: null, loaded: false });
+    set({ projects: [], loaded: false });
   },
 
   addProject: (p) => {
-    const userId = get().userId;
-    if (!userId) return;
     const optimistic: Project = {
       id: id(),
       name: "New Project",
@@ -167,7 +163,7 @@ export const useProjectStore = create<ProjectStore>()((set, get) => ({
     const supabase = createClient();
     supabase
       .from("projects")
-      .insert({ ...projectToRow(optimistic), user_id: userId })
+      .insert(projectToRow(optimistic))
       .select("*")
       .single()
       .then(({ data, error }) => {
@@ -210,16 +206,15 @@ export const useProjectStore = create<ProjectStore>()((set, get) => ({
   },
 
   duplicateProject: (projectId) => {
-    const userId = get().userId;
     const target = get().projects.find((p) => p.id === projectId);
-    if (!userId || !target) return;
+    if (!target) return;
     const copy: Project = { ...target, id: id(), name: `${target.name} (copy)` };
     set((s) => ({ projects: [...s.projects, copy] }));
 
     const supabase = createClient();
     supabase
       .from("projects")
-      .insert({ ...projectToRow(copy), user_id: userId })
+      .insert(projectToRow(copy))
       .select("*")
       .single()
       .then(({ data, error }) => {

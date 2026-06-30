@@ -16,9 +16,8 @@ interface FilterStore {
   filters: ProjectFilters;
   activeSavedViewId: string | null;
   savedViews: SavedView[];
-  userId: string | null;
   loaded: boolean;
-  init: (userId: string) => Promise<void>;
+  init: () => Promise<void>;
   reset: () => void;
   setFilters: (patch: Partial<ProjectFilters>) => void;
   resetFilters: () => void;
@@ -31,13 +30,12 @@ export const useFilterStore = create<FilterStore>()((set, get) => ({
   filters: EMPTY_FILTERS,
   activeSavedViewId: null,
   savedViews: [],
-  userId: null,
   loaded: false,
 
-  init: async (userId) => {
-    if (get().userId === userId && get().loaded) return;
+  init: async () => {
+    if (get().loaded) return;
     savedViewsRealtimeUnsubscribe?.();
-    set({ userId, loaded: false, savedViews: [] });
+    set({ loaded: false, savedViews: [] });
 
     const supabase = createClient();
     const { data, error } = await supabase
@@ -55,10 +53,10 @@ export const useFilterStore = create<FilterStore>()((set, get) => ({
     set({ savedViews: rows.map((r) => ({ id: r.id, name: r.name, filters: r.filters })), loaded: true });
 
     const channel = supabase
-      .channel(`saved-views-${userId}`)
+      .channel("saved-views-shared")
       .on(
         "postgres_changes",
-        { event: "*", schema: "public", table: "saved_views", filter: `user_id=eq.${userId}` },
+        { event: "*", schema: "public", table: "saved_views" },
         (payload) => {
           set((s) => {
             if (payload.eventType === "DELETE") {
@@ -89,7 +87,7 @@ export const useFilterStore = create<FilterStore>()((set, get) => ({
   reset: () => {
     savedViewsRealtimeUnsubscribe?.();
     savedViewsRealtimeUnsubscribe = null;
-    set({ savedViews: [], userId: null, loaded: false, filters: EMPTY_FILTERS, activeSavedViewId: null });
+    set({ savedViews: [], loaded: false, filters: EMPTY_FILTERS, activeSavedViewId: null });
   },
 
   setFilters: (patch) =>
@@ -98,13 +96,11 @@ export const useFilterStore = create<FilterStore>()((set, get) => ({
   resetFilters: () => set({ filters: EMPTY_FILTERS, activeSavedViewId: null }),
 
   saveCurrentAsView: (name) => {
-    const userId = get().userId;
-    if (!userId) return;
     const filters = get().filters;
     const supabase = createClient();
     supabase
       .from("saved_views")
-      .insert({ user_id: userId, name, filters })
+      .insert({ name, filters })
       .select("id, name, filters")
       .single()
       .then(({ data, error }) => {
