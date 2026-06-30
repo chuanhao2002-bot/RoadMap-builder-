@@ -1,9 +1,10 @@
 "use client";
 
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { useProjectStore } from "@/store/useProjectStore";
 import { useFilteredProjects } from "@/lib/useFilteredProjects";
 import type { Project, ProjectStatus } from "@/types/project";
+import { ExportMenu } from "./ExportMenu";
 
 const COLUMNS: ProjectStatus[] = ["Planning", "In Progress", "Blocked", "Completed"];
 
@@ -11,6 +12,7 @@ export function KanbanBoard() {
   const { updateProject } = useProjectStore();
   const projects = useFilteredProjects();
   const [dragOverColumn, setDragOverColumn] = useState<ProjectStatus | null>(null);
+  const containerRef = useRef<HTMLDivElement>(null);
 
   const handleDrop = (status: ProjectStatus, e: React.DragEvent) => {
     e.preventDefault();
@@ -20,7 +22,11 @@ export function KanbanBoard() {
   };
 
   return (
-    <div className="flex gap-4 overflow-x-auto pb-2">
+    <div className="space-y-3">
+      <div className="flex justify-end">
+        <ExportMenu containerRef={containerRef} filenameBase="roadmap-kanban" />
+      </div>
+      <div ref={containerRef} className="flex gap-4 overflow-x-auto pb-2 bg-white dark:bg-neutral-950 p-2">
       {COLUMNS.map((status) => {
         const items = projects.filter((p) => p.status === status);
         return (
@@ -50,6 +56,7 @@ export function KanbanBoard() {
           </div>
         );
       })}
+      </div>
     </div>
   );
 }

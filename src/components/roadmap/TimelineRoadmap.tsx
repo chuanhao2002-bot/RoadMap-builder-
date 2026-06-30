@@ -2,39 +2,26 @@
 
 import { useMemo, useRef } from "react";
 import { useFilteredProjects } from "@/lib/useFilteredProjects";
-import { toPng } from "html-to-image";
 import { computeTimelineLayout, ROW_HEIGHT } from "@/lib/timelineLayout";
+import { ExportMenu } from "./ExportMenu";
 
 export function TimelineRoadmap() {
   const projects = useFilteredProjects();
   const containerRef = useRef<HTMLDivElement>(null);
+  const svgRef = useRef<SVGSVGElement>(null);
 
   const { rows, totalWidth, totalHeight, months } = useMemo(
     () => computeTimelineLayout(projects),
     [projects]
   );
 
-  const exportPng = async () => {
-    if (!containerRef.current) return;
-    const dataUrl = await toPng(containerRef.current, { pixelRatio: 3, backgroundColor: "#ffffff" });
-    const link = document.createElement("a");
-    link.download = "roadmap.png";
-    link.href = dataUrl;
-    link.click();
-  };
-
   return (
     <div className="space-y-3">
       <div className="flex justify-end">
-        <button
-          onClick={exportPng}
-          className="rounded-md bg-neutral-900 text-white dark:bg-white dark:text-neutral-900 px-3 py-1.5 text-sm font-medium"
-        >
-          Export PNG
-        </button>
+        <ExportMenu containerRef={containerRef} svgRef={svgRef} filenameBase="roadmap-timeline" />
       </div>
       <div className="overflow-auto rounded-lg border border-neutral-200 dark:border-neutral-800 bg-white dark:bg-neutral-950" ref={containerRef}>
-        <svg width={Math.max(totalWidth, 600)} height={Math.max(totalHeight, 200)}>
+        <svg ref={svgRef} width={Math.max(totalWidth, 600)} height={Math.max(totalHeight, 200)}>
           {months.map((m) => (
             <g key={m.label}>
               <line x1={m.x} y1={0} x2={m.x} y2={totalHeight} stroke="currentColor" strokeOpacity={0.08} />

@@ -2,9 +2,9 @@
 
 import { useMemo, useRef, useState } from "react";
 import { useFilteredProjects } from "@/lib/useFilteredProjects";
-import { toPng } from "html-to-image";
 import { computeTimelineLayout, groupBy, ROW_HEIGHT, LEFT_PADDING } from "@/lib/timelineLayout";
 import type { Project } from "@/types/project";
+import { ExportMenu } from "./ExportMenu";
 
 const GROUP_FIELDS: { key: keyof Project; label: string }[] = [
   { key: "department", label: "Department" },
@@ -19,6 +19,7 @@ const LANE_HEADER_HEIGHT = 28;
 export function SwimlaneRoadmap() {
   const projects = useFilteredProjects();
   const containerRef = useRef<HTMLDivElement>(null);
+  const svgRef = useRef<SVGSVGElement>(null);
   const [groupField, setGroupField] = useState<keyof Project>("department");
 
   const groups = useMemo(() => {
@@ -38,15 +39,6 @@ export function SwimlaneRoadmap() {
   });
   const totalHeight = runningY;
 
-  const exportPng = async () => {
-    if (!containerRef.current) return;
-    const dataUrl = await toPng(containerRef.current, { pixelRatio: 3, backgroundColor: "#ffffff" });
-    const link = document.createElement("a");
-    link.download = "roadmap-swimlane.png";
-    link.href = dataUrl;
-    link.click();
-  };
-
   return (
     <div className="space-y-3">
       <div className="flex items-center justify-between">
@@ -64,18 +56,13 @@ export function SwimlaneRoadmap() {
             ))}
           </select>
         </label>
-        <button
-          onClick={exportPng}
-          className="rounded-md bg-neutral-900 text-white dark:bg-white dark:text-neutral-900 px-3 py-1.5 text-sm font-medium"
-        >
-          Export PNG
-        </button>
+        <ExportMenu containerRef={containerRef} svgRef={svgRef} filenameBase="roadmap-swimlane" />
       </div>
       <div
         className="overflow-auto rounded-lg border border-neutral-200 dark:border-neutral-800 bg-white dark:bg-neutral-950"
         ref={containerRef}
       >
-        <svg width={totalWidth} height={Math.max(totalHeight, 200)}>
+        <svg ref={svgRef} width={totalWidth} height={Math.max(totalHeight, 200)}>
           {groups.map((g, gi) => (
             <g key={g.name} transform={`translate(0, ${laneOffsets[gi]})`}>
               <rect x={0} y={0} width={totalWidth} height={g.layout.totalHeight} fill="currentColor" opacity={0.03} />

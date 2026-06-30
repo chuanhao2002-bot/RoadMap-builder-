@@ -13,7 +13,7 @@ Budget-APP repo. It does not share code with the budget app.
   `localStorage` for now
 - Supabase client helper at `src/lib/supabase.ts`, not yet wired to a real
   project (no auth, no realtime sync, no RLS schema yet)
-- `html-to-image` for PNG export of the SVG roadmap
+- `html-to-image` + `jsPDF` for PNG/SVG/PDF export of the roadmap (`src/lib/exportRoadmap.ts`)
 
 ## What's implemented
 
@@ -23,7 +23,10 @@ Budget-APP repo. It does not share code with the budget app.
 - **Timeline / Swimlane / Kanban views** (`/views`): SVG Gantt-style roadmap,
   grouped lanes (by department/category/owner/status/priority), and a
   drag-and-drop status board — all auto-generated from the spreadsheet via
-  `src/lib/timelineLayout.ts`. PNG export on Timeline/Swimlane.
+  `src/lib/timelineLayout.ts`.
+- **Export**: PNG, SVG, and PDF via the `ExportMenu` on each view (`src/lib/
+  exportRoadmap.ts`). Timeline and Swimlane export all three formats; Kanban
+  exports PNG/PDF (it's a DOM board, not SVG).
 - **Filters + saved views**: search and multi-select filters (status,
   priority, department, category, owner, date range) via `FilterBar`,
   applied everywhere through `useFilteredProjects()`. Filter sets can be
@@ -69,6 +72,5 @@ order of value:
 2. ~~Add Swimlane and Kanban views~~ — done.
 3. ~~Filters + saved views~~ — done.
 4. ~~Presentation mode~~ — done (no presenter notes/timer/laser pointer yet).
-5. PDF/SVG export alongside the existing PNG export (`jsPDF` is already
-   installed).
+5. ~~PDF/SVG export~~ — done.
 6. Realtime collaboration via Supabase Realtime once the backend exists.
