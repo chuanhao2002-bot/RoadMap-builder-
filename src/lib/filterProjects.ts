@@ -13,7 +13,6 @@ export function filterProjects(projects: Project[], f: ProjectFilters): Project[
     if (f.department.length && !f.department.includes(p.department)) return false;
     if (f.category.length && !f.category.includes(p.category)) return false;
     if (f.owner.length && !f.owner.includes(p.owner)) return false;
-    if (f.tags.length && !f.tags.some((t) => p.tags.includes(t))) return false;
     if (f.startAfter && p.startDate < f.startAfter) return false;
     if (f.endBefore && p.endDate > f.endBefore) return false;
     return true;

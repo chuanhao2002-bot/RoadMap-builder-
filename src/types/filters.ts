@@ -7,7 +7,6 @@ export interface ProjectFilters {
   department: string[];
   category: string[];
   owner: string[];
-  tags: string[];
   startAfter: string;
   endBefore: string;
 }
@@ -19,7 +18,6 @@ export const EMPTY_FILTERS: ProjectFilters = {
   department: [],
   category: [],
   owner: [],
-  tags: [],
   startAfter: "",
   endBefore: "",
 };
@@ -38,7 +36,6 @@ export function isFiltersEmpty(filters: ProjectFilters) {
     filters.department.length === 0 &&
     filters.category.length === 0 &&
     filters.owner.length === 0 &&
-    filters.tags.length === 0 &&
     !filters.startAfter &&
     !filters.endBefore
   );

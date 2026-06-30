@@ -83,15 +83,6 @@ export function SwimlaneRoadmap() {
               {g.layout.rows.map(({ project, x, y, width }) => (
                 <g key={project.id}>
                   <rect x={x} y={y} width={width} height={ROW_HEIGHT - 14} rx={8} fill={project.color} opacity={0.9} />
-                  <rect
-                    x={x}
-                    y={y}
-                    width={(width * project.progress) / 100}
-                    height={ROW_HEIGHT - 14}
-                    rx={8}
-                    fill={project.color}
-                    opacity={0.5}
-                  />
                   <text x={x + 8} y={y + (ROW_HEIGHT - 14) / 2 + 4} fontSize={12} fill="#fff" fontWeight={500}>
                     {project.name}
                   </text>

@@ -112,10 +112,6 @@ export function TimelineRoadmap() {
                           style={{ left: `${bar.leftPct}%`, width: `${Math.max(bar.widthPct, 1)}%`, background: project.color, opacity: 0.9 }}
                           title={project.name}
                         >
-                          <div
-                            className="h-full"
-                            style={{ width: `${project.progress}%`, background: project.color, opacity: 0.5 }}
-                          />
                           <span className="absolute inset-0 flex items-center px-2 text-xs font-medium text-white truncate">
                             {project.name}
                             {project.milestone && <span className="ml-1">🚩</span>}

@@ -10,12 +10,10 @@ export interface Project {
   owner: string;
   status: ProjectStatus;
   priority: ProjectPriority;
-  progress: number; // 0-100
   startDate: string; // ISO date
   endDate: string; // ISO date
   color: string;
   milestone: boolean;
-  tags: string[];
   kpi: string;
 }
 
@@ -27,11 +25,9 @@ export const PROJECT_COLUMNS: { key: keyof Project; label: string }[] = [
   { key: "owner", label: "Owner" },
   { key: "status", label: "Status" },
   { key: "priority", label: "Priority" },
-  { key: "progress", label: "Progress" },
   { key: "startDate", label: "Start Date" },
   { key: "endDate", label: "End Date" },
   { key: "color", label: "Color" },
   { key: "milestone", label: "Milestone" },
-  { key: "tags", label: "Tags" },
   { key: "kpi", label: "KPI" },
 ];

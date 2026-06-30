@@ -77,10 +77,6 @@ function KanbanCard({ project }: { project: Project }) {
       </div>
       <div className="mt-2 flex items-center justify-between text-xs text-neutral-500">
         <span>{project.priority}</span>
-        <span>{project.progress}%</span>
-      </div>
-      <div className="mt-1 h-1.5 rounded-full bg-neutral-100 dark:bg-neutral-800 overflow-hidden">
-        <div className="h-full rounded-full" style={{ width: `${project.progress}%`, background: project.color }} />
       </div>
     </div>
   );

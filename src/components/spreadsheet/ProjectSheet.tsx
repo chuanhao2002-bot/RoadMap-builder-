@@ -41,16 +41,6 @@ export function ProjectSheet() {
               <SelectCell value={p.priority} options={PRIORITIES} onChange={(v) => updateProject(p.id, { priority: v as ProjectPriority })} />
               <td className="px-3 py-1">
                 <input
-                  type="number"
-                  min={0}
-                  max={100}
-                  value={p.progress}
-                  onChange={(e) => updateProject(p.id, { progress: Number(e.target.value) })}
-                  className="w-16 bg-transparent outline-none"
-                />
-              </td>
-              <td className="px-3 py-1">
-                <input
                   type="date"
                   value={p.startDate}
                   onChange={(e) => updateProject(p.id, { startDate: e.target.value })}
@@ -80,10 +70,6 @@ export function ProjectSheet() {
                   onChange={(e) => updateProject(p.id, { milestone: e.target.checked })}
                 />
               </td>
-              <Cell
-                value={p.tags.join(", ")}
-                onChange={(v) => updateProject(p.id, { tags: v.split(",").map((t) => t.trim()).filter(Boolean) })}
-              />
               <td className="px-2 py-1 whitespace-nowrap">
                 <button onClick={() => duplicateProject(p.id)} className="p-1 text-neutral-400 hover:text-neutral-700">
                   <Copy size={14} />
