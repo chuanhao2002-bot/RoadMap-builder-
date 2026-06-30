@@ -16,6 +16,7 @@ export interface Project {
   color: string;
   milestone: boolean;
   tags: string[];
+  kpi: string;
 }
 
 export const PROJECT_COLUMNS: { key: keyof Project; label: string }[] = [
@@ -32,4 +33,5 @@ export const PROJECT_COLUMNS: { key: keyof Project; label: string }[] = [
   { key: "color", label: "Color" },
   { key: "milestone", label: "Milestone" },
   { key: "tags", label: "Tags" },
+  { key: "kpi", label: "KPI" },
 ];

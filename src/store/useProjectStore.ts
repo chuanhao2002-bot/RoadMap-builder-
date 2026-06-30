@@ -24,6 +24,7 @@ const seedProjects: Omit<Project, "id">[] = [
     color: "#3b82f6",
     milestone: false,
     tags: ["auth", "ux"],
+    kpi: "",
   },
   {
     name: "AI Search",
@@ -39,6 +40,7 @@ const seedProjects: Omit<Project, "id">[] = [
     color: "#a855f7",
     milestone: false,
     tags: ["ai", "search"],
+    kpi: "",
   },
   {
     name: "Payments Overhaul",
@@ -54,6 +56,7 @@ const seedProjects: Omit<Project, "id">[] = [
     color: "#f97316",
     milestone: true,
     tags: ["billing"],
+    kpi: "",
   },
 ];
 
@@ -156,6 +159,7 @@ export const useProjectStore = create<ProjectStore>()((set, get) => ({
       color: "#64748b",
       milestone: false,
       tags: [],
+      kpi: "",
       ...p,
     };
     set((s) => ({ projects: [...s.projects, optimistic] }));

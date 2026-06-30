@@ -59,6 +59,58 @@ export function computeTimelineLayout(projects: Project[], topPadding = TOP_PADD
   return { rows, totalWidth, totalHeight, months };
 }
 
+export interface YearBar {
+  project: Project;
+  leftPct: number;
+  widthPct: number;
+}
+
+export interface YearMonth {
+  leftPct: number;
+  label: string;
+}
+
+export interface YearLayout {
+  bars: YearBar[];
+  months: YearMonth[];
+}
+
+function isLeapYear(year: number) {
+  return (year % 4 === 0 && year % 100 !== 0) || year % 400 === 0;
+}
+
+export function computeYearLayout(projects: Project[], year: number): YearLayout {
+  const yearStart = new Date(year, 0, 1);
+  const yearEnd = new Date(year, 11, 31);
+  const totalDays = isLeapYear(year) ? 366 : 365;
+
+  const bars: YearBar[] = projects
+    .map((project) => {
+      const start = new Date(project.startDate);
+      const end = new Date(project.endDate);
+      const clippedStart = start < yearStart ? yearStart : start;
+      const clippedEnd = end > yearEnd ? yearEnd : end;
+      if (clippedStart > clippedEnd) return null;
+
+      const leftPct = (daysBetween(yearStart, clippedStart) / totalDays) * 100;
+      const widthDays = Math.max(daysBetween(clippedStart, clippedEnd), 1);
+      const widthPct = (widthDays / totalDays) * 100;
+      return { project, leftPct, widthPct };
+    })
+    .filter((b): b is YearBar => b !== null);
+
+  const months: YearMonth[] = [];
+  for (let m = 0; m < 12; m++) {
+    const monthStart = new Date(year, m, 1);
+    months.push({
+      leftPct: (daysBetween(yearStart, monthStart) / totalDays) * 100,
+      label: monthStart.toLocaleDateString("en-US", { month: "short" }),
+    });
+  }
+
+  return { bars, months };
+}
+
 export function groupBy<T, K extends string>(items: T[], keyFn: (item: T) => K): Record<K, T[]> {
   const result = {} as Record<K, T[]>;
   for (const item of items) {

@@ -15,6 +15,7 @@ export interface ProjectRow {
   color: string | null;
   milestone: boolean;
   tags: string[];
+  kpi: string | null;
 }
 
 export function rowToProject(row: ProjectRow): Project {
@@ -33,6 +34,7 @@ export function rowToProject(row: ProjectRow): Project {
     color: row.color ?? "#64748b",
     milestone: row.milestone,
     tags: row.tags ?? [],
+    kpi: row.kpi ?? "",
   };
 }
 
@@ -51,5 +53,6 @@ export function projectToRow(p: Partial<Project>) {
   if (p.color !== undefined) row.color = p.color;
   if (p.milestone !== undefined) row.milestone = p.milestone;
   if (p.tags !== undefined) row.tags = p.tags;
+  if (p.kpi !== undefined) row.kpi = p.kpi;
   return row;
 }
