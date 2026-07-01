@@ -7,6 +7,16 @@ import { Plus, Copy, Trash2 } from "lucide-react";
 
 const STATUSES: ProjectStatus[] = ["Planning", "In Progress", "Blocked", "Completed"];
 const PRIORITIES: ProjectPriority[] = ["Low", "Medium", "High", "Critical"];
+const COLOR_PRESETS = [
+  "#3b82f6",
+  "#a855f7",
+  "#f97316",
+  "#10b981",
+  "#ec4899",
+  "#06b6d4",
+  "#eab308",
+  "#ef4444",
+];
 
 export function ProjectSheet() {
   const { updateProject, addProject, removeProject, duplicateProject } = useProjectStore();
@@ -32,8 +42,8 @@ export function ProjectSheet() {
               <td className="px-2">
                 <span className="inline-block w-3 h-3 rounded-full" style={{ background: p.color }} />
               </td>
-              <Cell value={p.name} onChange={(v) => updateProject(p.id, { name: v })} />
-              <Cell value={p.description} onChange={(v) => updateProject(p.id, { description: v })} />
+              <WrapCell value={p.name} onChange={(v) => updateProject(p.id, { name: v })} />
+              <WrapCell value={p.description} onChange={(v) => updateProject(p.id, { description: v })} />
               <Cell value={p.category} onChange={(v) => updateProject(p.id, { category: v })} />
               <Cell value={p.department} onChange={(v) => updateProject(p.id, { department: v })} />
               <Cell value={p.owner} onChange={(v) => updateProject(p.id, { owner: v })} />
@@ -55,14 +65,7 @@ export function ProjectSheet() {
                   className="bg-transparent outline-none"
                 />
               </td>
-              <td className="px-3 py-1">
-                <input
-                  type="color"
-                  value={p.color}
-                  onChange={(e) => updateProject(p.id, { color: e.target.value })}
-                  className="w-8 h-6 bg-transparent"
-                />
-              </td>
+              <ColorCell value={p.color} onChange={(v) => updateProject(p.id, { color: v })} />
               <td className="px-3 py-1 text-center">
                 <input
                   type="checkbox"
@@ -100,6 +103,57 @@ function Cell({ value, onChange }: { value: string; onChange: (v: string) => voi
         onChange={(e) => onChange(e.target.value)}
         className="w-full bg-transparent outline-none min-w-[8rem]"
       />
+    </td>
+  );
+}
+
+function WrapCell({ value, onChange }: { value: string; onChange: (v: string) => void }) {
+  return (
+    <td className="px-3 py-1 align-top">
+      <textarea
+        value={value}
+        onChange={(e) => {
+          onChange(e.target.value);
+          e.target.style.height = "auto";
+          e.target.style.height = `${e.target.scrollHeight}px`;
+        }}
+        ref={(el) => {
+          if (el) {
+            el.style.height = "auto";
+            el.style.height = `${el.scrollHeight}px`;
+          }
+        }}
+        rows={1}
+        className="w-full bg-transparent outline-none resize-none whitespace-pre-wrap break-words min-w-[10rem] leading-snug"
+      />
+    </td>
+  );
+}
+
+function ColorCell({ value, onChange }: { value: string; onChange: (v: string) => void }) {
+  return (
+    <td className="px-3 py-1">
+      <div className="flex items-center gap-1">
+        {COLOR_PRESETS.map((preset) => (
+          <button
+            key={preset}
+            type="button"
+            title={preset}
+            onClick={() => onChange(preset)}
+            className={`w-4 h-4 rounded-full shrink-0 transition-transform hover:scale-110 ${
+              value.toLowerCase() === preset ? "ring-2 ring-offset-1 ring-neutral-500 dark:ring-offset-neutral-950" : ""
+            }`}
+            style={{ background: preset }}
+          />
+        ))}
+        <input
+          type="color"
+          value={value}
+          onChange={(e) => onChange(e.target.value)}
+          title="Custom color"
+          className="w-4 h-4 bg-transparent shrink-0 cursor-pointer"
+        />
+      </div>
     </td>
   );
 }
