@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useRef, useState } from "react";
+import { useCallback, useMemo, useRef, useState } from "react";
 import { useFilteredProjects } from "@/lib/useFilteredProjects";
 import { useProjectStore } from "@/store/useProjectStore";
 import { computeYearLayout, daysBetween, groupBy } from "@/lib/timelineLayout";
@@ -16,10 +16,86 @@ const CATEGORY_DOT_COLORS = [
   "#eab308",
 ];
 
+const MARQUEE_PAUSE_MS = 600;
+const MARQUEE_PX_PER_SEC = 40;
+
+function useHoverMarquee<T extends HTMLInputElement>() {
+  const frame = useRef<number | null>(null);
+
+  const stop = useCallback((el: T) => {
+    if (frame.current !== null) cancelAnimationFrame(frame.current);
+    frame.current = null;
+    el.scrollLeft = 0;
+  }, []);
+
+  const onMouseEnter = useCallback((e: React.MouseEvent<T>) => {
+    const el = e.currentTarget;
+    if (document.activeElement === el) return;
+    const distance = el.scrollWidth - el.clientWidth;
+    if (distance <= 0) return;
+
+    const duration = (distance / MARQUEE_PX_PER_SEC) * 1000;
+    let start: number | null = null;
+    let phase: "out" | "pause-end" | "back" | "pause-start" = "out";
+    let phaseStart = 0;
+
+    const step = (t: number) => {
+      if (start === null) start = t;
+      if (phaseStart === 0) phaseStart = t;
+      const elapsed = t - phaseStart;
+
+      if (phase === "out") {
+        const progress = Math.min(elapsed / duration, 1);
+        el.scrollLeft = progress * distance;
+        if (progress >= 1) {
+          phase = "pause-end";
+          phaseStart = t;
+        }
+      } else if (phase === "pause-end") {
+        if (elapsed >= MARQUEE_PAUSE_MS) {
+          phase = "back";
+          phaseStart = t;
+        }
+      } else if (phase === "back") {
+        const progress = Math.min(elapsed / duration, 1);
+        el.scrollLeft = (1 - progress) * distance;
+        if (progress >= 1) {
+          phase = "pause-start";
+          phaseStart = t;
+        }
+      } else {
+        if (elapsed >= MARQUEE_PAUSE_MS) {
+          phase = "out";
+          phaseStart = t;
+        }
+      }
+      frame.current = requestAnimationFrame(step);
+    };
+    frame.current = requestAnimationFrame(step);
+  }, []);
+
+  const onMouseLeave = useCallback(
+    (e: React.MouseEvent<T>) => {
+      stop(e.currentTarget);
+    },
+    [stop]
+  );
+
+  const onFocus = useCallback(
+    (e: React.FocusEvent<T>) => {
+      stop(e.currentTarget);
+    },
+    [stop]
+  );
+
+  return { onMouseEnter, onMouseLeave, onFocus };
+}
+
 export function TimelineRoadmap() {
   const projects = useFilteredProjects();
   const updateProject = useProjectStore((s) => s.updateProject);
   const containerRef = useRef<HTMLDivElement>(null);
+  const marquee = useHoverMarquee<HTMLInputElement>();
 
   const defaultYear = useMemo(() => {
     if (projects.length === 0) return new Date().getFullYear();
@@ -179,6 +255,9 @@ export function TimelineRoadmap() {
                           value={project.targetGoal}
                           onChange={(e) => updateProject(project.id, { targetGoal: e.target.value })}
                           placeholder="Add target goal..."
+                          onMouseEnter={marquee.onMouseEnter}
+                          onMouseLeave={marquee.onMouseLeave}
+                          onFocus={marquee.onFocus}
                           className="w-full rounded-md bg-transparent px-1.5 py-1 outline-none placeholder:italic placeholder:text-neutral-400 hover:bg-neutral-50 dark:hover:bg-neutral-900 focus:bg-neutral-50 dark:focus:bg-neutral-900 focus:ring-1 focus:ring-neutral-300 dark:focus:ring-neutral-700 transition-colors"
                         />
                       </td>
