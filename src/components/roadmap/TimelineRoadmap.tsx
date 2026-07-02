@@ -96,6 +96,7 @@ export function TimelineRoadmap() {
   const updateProject = useProjectStore((s) => s.updateProject);
   const containerRef = useRef<HTMLDivElement>(null);
   const marquee = useHoverMarquee<HTMLInputElement>();
+  const [hoveredId, setHoveredId] = useState<string | null>(null);
 
   const defaultYear = useMemo(() => {
     if (projects.length === 0) return new Date().getFullYear();
@@ -235,18 +236,34 @@ export function TimelineRoadmap() {
                         )}
                         {bar && (
                           <div
-                            className="group absolute top-2 bottom-2 rounded-full overflow-hidden shadow-sm ring-1 ring-black/5 transition-all hover:shadow-md hover:brightness-105"
+                            className="group absolute top-2 bottom-2 rounded-full overflow-visible shadow-sm ring-1 ring-black/5 transition-all hover:shadow-md hover:brightness-105"
                             style={{
                               left: `${bar.leftPct}%`,
                               width: `${Math.max(bar.widthPct, 1)}%`,
                               background: project.color,
                             }}
-                            title={project.name}
+                            onMouseEnter={() => setHoveredId(project.id)}
+                            onMouseLeave={() =>
+                              setHoveredId((id) => (id === project.id ? null : id))
+                            }
                           >
-                            <span className="absolute inset-0 flex items-center px-2.5 text-xs font-medium text-white truncate">
+                            <span className="absolute inset-0 flex items-center px-2.5 rounded-full overflow-hidden text-xs font-medium text-white truncate">
                               {project.name}
                               {project.milestone && <span className="ml-1">🚩</span>}
                             </span>
+                            {hoveredId === project.id && (
+                              <div
+                                className="pointer-events-none absolute left-0 z-20 w-max max-w-xs rounded-lg border border-neutral-200 dark:border-neutral-800 bg-white dark:bg-neutral-900 p-2.5 shadow-lg"
+                                style={{ bottom: "calc(100% + 6px)" }}
+                              >
+                                <p className="text-xs font-semibold text-neutral-900 dark:text-white truncate max-w-xs">
+                                  {project.name}
+                                </p>
+                                <p className="mt-0.5 text-xs text-neutral-500 dark:text-neutral-400 max-w-xs">
+                                  {project.description || "No description"}
+                                </p>
+                              </div>
+                            )}
                           </div>
                         )}
                       </td>
