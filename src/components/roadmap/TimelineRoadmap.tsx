@@ -97,6 +97,15 @@ export function TimelineRoadmap() {
   const containerRef = useRef<HTMLDivElement>(null);
   const marquee = useHoverMarquee<HTMLInputElement>();
   const [hoveredId, setHoveredId] = useState<string | null>(null);
+  const [popoverPlacement, setPopoverPlacement] = useState<"above" | "below">("above");
+
+  const handleBarMouseEnter = (projectId: string) => (e: React.MouseEvent<HTMLDivElement>) => {
+    setHoveredId(projectId);
+    const barRect = e.currentTarget.getBoundingClientRect();
+    const containerRect = containerRef.current?.getBoundingClientRect();
+    const spaceAbove = containerRect ? barRect.top - containerRect.top : barRect.top;
+    setPopoverPlacement(spaceAbove < 90 ? "below" : "above");
+  };
 
   const defaultYear = useMemo(() => {
     if (projects.length === 0) return new Date().getFullYear();
@@ -242,7 +251,7 @@ export function TimelineRoadmap() {
                               width: `${Math.max(bar.widthPct, 1)}%`,
                               background: project.color,
                             }}
-                            onMouseEnter={() => setHoveredId(project.id)}
+                            onMouseEnter={handleBarMouseEnter(project.id)}
                             onMouseLeave={() =>
                               setHoveredId((id) => (id === project.id ? null : id))
                             }
@@ -254,7 +263,11 @@ export function TimelineRoadmap() {
                             {hoveredId === project.id && (
                               <div
                                 className="pointer-events-none absolute left-0 z-20 w-max max-w-xs rounded-lg border border-neutral-200 dark:border-neutral-800 bg-white dark:bg-neutral-900 p-2.5 shadow-lg"
-                                style={{ bottom: "calc(100% + 6px)" }}
+                                style={
+                                  popoverPlacement === "above"
+                                    ? { bottom: "calc(100% + 6px)" }
+                                    : { top: "calc(100% + 6px)" }
+                                }
                               >
                                 <p className="text-xs font-semibold text-neutral-900 dark:text-white truncate max-w-xs">
                                   {project.name}
