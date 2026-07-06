@@ -41,7 +41,7 @@ export function FilterBar() {
 
         <MultiSelect label="Status" options={STATUSES} selected={filters.status} onToggle={(v) => setFilters({ status: toggle(filters.status, v) })} />
         <MultiSelect label="Priority" options={PRIORITIES} selected={filters.priority} onToggle={(v) => setFilters({ priority: toggle(filters.priority, v) })} />
-        <MultiSelect label="Department" options={departments} selected={filters.department} onToggle={(v) => setFilters({ department: toggle(filters.department, v) })} />
+        <MultiSelect label="Request By" options={departments} selected={filters.department} onToggle={(v) => setFilters({ department: toggle(filters.department, v) })} />
         <MultiSelect label="Category" options={categories} selected={filters.category} onToggle={(v) => setFilters({ category: toggle(filters.category, v) })} />
         <MultiSelect label="Owner" options={owners} selected={filters.owner} onToggle={(v) => setFilters({ owner: toggle(filters.owner, v) })} />
 

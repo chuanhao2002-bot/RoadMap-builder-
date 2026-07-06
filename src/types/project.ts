@@ -15,13 +15,14 @@ export interface Project {
   color: string;
   milestone: boolean;
   targetGoal: string;
+  mandays: string;
 }
 
 export const PROJECT_COLUMNS: { key: keyof Project; label: string }[] = [
   { key: "name", label: "Project Name" },
   { key: "description", label: "Description" },
   { key: "category", label: "Category" },
-  { key: "department", label: "Department" },
+  { key: "department", label: "Request By" },
   { key: "owner", label: "Owner" },
   { key: "status", label: "Status" },
   { key: "priority", label: "Priority" },
@@ -30,4 +31,5 @@ export const PROJECT_COLUMNS: { key: keyof Project; label: string }[] = [
   { key: "color", label: "Color" },
   { key: "milestone", label: "Milestone" },
   { key: "targetGoal", label: "Target Goal" },
+  { key: "mandays", label: "Mandays" },
 ];

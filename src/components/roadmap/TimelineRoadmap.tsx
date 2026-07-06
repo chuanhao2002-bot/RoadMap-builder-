@@ -275,6 +275,9 @@ export function TimelineRoadmap() {
                                 <p className="mt-0.5 text-xs text-neutral-500 dark:text-neutral-400 max-w-xs">
                                   {project.description || "No description"}
                                 </p>
+                                <p className="mt-1 text-xs text-neutral-400 dark:text-neutral-500">
+                                  Mandays: {project.mandays || "—"}
+                                </p>
                               </div>
                             )}
                           </div>

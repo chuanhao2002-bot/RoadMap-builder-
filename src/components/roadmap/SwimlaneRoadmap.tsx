@@ -7,7 +7,7 @@ import type { Project } from "@/types/project";
 import { ExportMenu } from "./ExportMenu";
 
 const GROUP_FIELDS: { key: keyof Project; label: string }[] = [
-  { key: "department", label: "Department" },
+  { key: "department", label: "Request By" },
   { key: "category", label: "Category" },
   { key: "owner", label: "Owner" },
   { key: "status", label: "Status" },

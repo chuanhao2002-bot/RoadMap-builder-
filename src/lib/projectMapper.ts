@@ -14,6 +14,7 @@ export interface ProjectRow {
   color: string | null;
   milestone: boolean;
   target_goal: string | null;
+  mandays: string | null;
 }
 
 export function rowToProject(row: ProjectRow): Project {
@@ -31,6 +32,7 @@ export function rowToProject(row: ProjectRow): Project {
     color: row.color ?? "#64748b",
     milestone: row.milestone,
     targetGoal: row.target_goal ?? "",
+    mandays: row.mandays ?? "",
   };
 }
 
@@ -48,5 +50,6 @@ export function projectToRow(p: Partial<Project>) {
   if (p.color !== undefined) row.color = p.color;
   if (p.milestone !== undefined) row.milestone = p.milestone;
   if (p.targetGoal !== undefined) row.target_goal = p.targetGoal;
+  if (p.mandays !== undefined) row.mandays = p.mandays;
   return row;
 }

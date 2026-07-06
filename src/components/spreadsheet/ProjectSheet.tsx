@@ -3,7 +3,8 @@
 import { useProjectStore } from "@/store/useProjectStore";
 import { useFilteredProjects } from "@/lib/useFilteredProjects";
 import { PROJECT_COLUMNS, type Project, type ProjectStatus, type ProjectPriority } from "@/types/project";
-import { Plus, Copy, Trash2 } from "lucide-react";
+import { exportProjectsAsCsv } from "@/lib/exportCsv";
+import { Plus, Copy, Trash2, Download } from "lucide-react";
 
 const STATUSES: ProjectStatus[] = ["Planning", "In Progress", "Blocked", "Completed"];
 const PRIORITIES: ProjectPriority[] = ["Low", "Medium", "High", "Critical"];
@@ -23,7 +24,16 @@ export function ProjectSheet() {
   const projects = useFilteredProjects();
 
   return (
-    <div className="overflow-auto rounded-lg border border-neutral-200 dark:border-neutral-800">
+    <div className="space-y-2">
+      <div className="flex justify-end">
+        <button
+          onClick={() => exportProjectsAsCsv(projects)}
+          className="flex items-center gap-1.5 rounded-md bg-neutral-900 dark:bg-white text-white dark:text-neutral-900 px-3 py-1.5 text-sm font-medium hover:opacity-90"
+        >
+          <Download size={14} /> Export CSV
+        </button>
+      </div>
+      <div className="overflow-auto rounded-lg border border-neutral-200 dark:border-neutral-800">
       <table className="min-w-full text-sm">
         <thead className="sticky top-0 bg-neutral-100 dark:bg-neutral-900 z-10">
           <tr>
@@ -73,6 +83,8 @@ export function ProjectSheet() {
                   onChange={(e) => updateProject(p.id, { milestone: e.target.checked })}
                 />
               </td>
+              <Cell value={p.targetGoal} onChange={(v) => updateProject(p.id, { targetGoal: v })} />
+              <Cell value={p.mandays} onChange={(v) => updateProject(p.id, { mandays: v })} />
               <td className="px-2 py-1 whitespace-nowrap">
                 <button onClick={() => duplicateProject(p.id)} className="p-1 text-neutral-400 hover:text-neutral-700">
                   <Copy size={14} />
@@ -91,6 +103,7 @@ export function ProjectSheet() {
       >
         <Plus size={14} /> Add row
       </button>
+      </div>
     </div>
   );
 }
