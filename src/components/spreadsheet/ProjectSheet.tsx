@@ -1,12 +1,13 @@
 "use client";
 
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { useProjectStore } from "@/store/useProjectStore";
 import { useFilteredProjects } from "@/lib/useFilteredProjects";
 import { PROJECT_COLUMNS, type Project, type ProjectStatus, type ProjectPriority } from "@/types/project";
 import { STATUSES, PRIORITIES } from "@/lib/projectOptions";
 import { exportProjectsAsCsv } from "@/lib/exportCsv";
-import { Plus, Copy, Trash2, Download, X } from "lucide-react";
+import { parseProjectsCsv } from "@/lib/importCsv";
+import { Plus, Copy, Trash2, Download, Upload, X } from "lucide-react";
 
 const COLOR_PRESETS = [
   "#3b82f6",
@@ -43,9 +44,34 @@ export function ProjectSheet() {
     setSelectedIds([]);
   };
 
+  const fileInputRef = useRef<HTMLInputElement>(null);
+
+  const handleImportFile = async (file: File) => {
+    const text = await file.text();
+    const parsed = parseProjectsCsv(text);
+    parsed.forEach((p) => addProject(p));
+  };
+
   return (
     <div className="space-y-2">
-      <div className="flex justify-end">
+      <div className="flex justify-end gap-2">
+        <input
+          ref={fileInputRef}
+          type="file"
+          accept=".csv,text/csv"
+          className="hidden"
+          onChange={(e) => {
+            const file = e.target.files?.[0];
+            if (file) handleImportFile(file);
+            e.target.value = "";
+          }}
+        />
+        <button
+          onClick={() => fileInputRef.current?.click()}
+          className="flex items-center gap-1.5 rounded-md border border-neutral-300 dark:border-neutral-700 px-3 py-1.5 text-sm font-medium hover:bg-neutral-50 dark:hover:bg-neutral-900"
+        >
+          <Upload size={14} /> Import CSV
+        </button>
         <button
           onClick={() => exportProjectsAsCsv(projects)}
           className="flex items-center gap-1.5 rounded-md bg-neutral-900 dark:bg-white text-white dark:text-neutral-900 px-3 py-1.5 text-sm font-medium hover:opacity-90"

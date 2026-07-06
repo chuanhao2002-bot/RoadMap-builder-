@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { Download, ChevronDown } from "lucide-react";
 import { exportElementAsPdf, exportElementAsPng, exportSvgElement } from "@/lib/exportRoadmap";
+import { exportElementAsPptx } from "@/lib/exportPptx";
 
 interface ExportMenuProps {
   containerRef: React.RefObject<HTMLElement | null>;
@@ -61,6 +62,17 @@ export function ExportMenu({ containerRef, svgRef, filenameBase }: ExportMenuPro
               className="w-full text-left px-2 py-1.5 text-sm rounded hover:bg-neutral-100 dark:hover:bg-neutral-900"
             >
               PDF
+            </button>
+            <button
+              onClick={() =>
+                run(() => {
+                  if (containerRef.current)
+                    return exportElementAsPptx(containerRef.current, `${filenameBase}.pptx`, filenameBase);
+                })
+              }
+              className="w-full text-left px-2 py-1.5 text-sm rounded hover:bg-neutral-100 dark:hover:bg-neutral-900"
+            >
+              PPTX
             </button>
           </div>
         </>
