@@ -18,6 +18,7 @@ export interface ProjectRow {
   progress: number | null;
   actual_start_date: string | null;
   actual_end_date: string | null;
+  updated_at: string | null;
 }
 
 export function rowToProject(row: ProjectRow): Project {
@@ -39,6 +40,7 @@ export function rowToProject(row: ProjectRow): Project {
     progress: row.progress ?? 0,
     actualStartDate: row.actual_start_date ?? "",
     actualEndDate: row.actual_end_date ?? "",
+    updatedAt: row.updated_at ?? "",
   };
 }
 

@@ -19,6 +19,7 @@ export interface Project {
   progress: number;
   actualStartDate: string;
   actualEndDate: string;
+  updatedAt: string;
 }
 
 export const PROJECT_COLUMNS: { key: keyof Project; label: string }[] = [
