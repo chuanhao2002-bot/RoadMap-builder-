@@ -228,7 +228,10 @@ export function TimelineRoadmap() {
                           </span>
                         </td>
                       )}
-                      <td className="relative px-1 py-1" style={{ height: 48 }}>
+                      <td
+                        className="relative px-1 py-1"
+                        style={{ height: 48, zIndex: hoveredId === project.id ? 30 : undefined }}
+                      >
                         <div className="absolute inset-0 flex">
                           {months.map((m, mi) => (
                             <div
