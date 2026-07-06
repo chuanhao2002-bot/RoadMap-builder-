@@ -246,6 +246,13 @@ export function TimelineRoadmap() {
                             style={{ left: `${todayLeftPct}%` }}
                           />
                         )}
+                        {bar && project.milestone && (
+                          <div
+                            className="absolute top-0 w-2.5 h-2.5 rotate-45 rounded-[2px] shadow-sm ring-1 ring-black/10 pointer-events-none"
+                            style={{ left: `calc(${bar.leftPct}% - 5px)`, background: project.color }}
+                            title={`Milestone: ${project.name}`}
+                          />
+                        )}
                         {bar && (
                           <div
                             className="group absolute top-2 bottom-2 rounded-full overflow-visible shadow-sm ring-1 ring-black/5 transition-all hover:shadow-md hover:brightness-105"

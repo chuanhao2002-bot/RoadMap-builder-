@@ -1,10 +1,11 @@
 "use client";
 
+import { useState } from "react";
 import { useProjectStore } from "@/store/useProjectStore";
 import { useFilteredProjects } from "@/lib/useFilteredProjects";
 import { PROJECT_COLUMNS, type Project, type ProjectStatus, type ProjectPriority } from "@/types/project";
 import { exportProjectsAsCsv } from "@/lib/exportCsv";
-import { Plus, Copy, Trash2, Download } from "lucide-react";
+import { Plus, Copy, Trash2, Download, X } from "lucide-react";
 
 const STATUSES: ProjectStatus[] = ["Planning", "In Progress", "Blocked", "Completed"];
 const PRIORITIES: ProjectPriority[] = ["Low", "Medium", "High", "Critical"];
@@ -22,6 +23,26 @@ const COLOR_PRESETS = [
 export function ProjectSheet() {
   const { updateProject, addProject, removeProject, duplicateProject } = useProjectStore();
   const projects = useFilteredProjects();
+  const [selectedIds, setSelectedIds] = useState<string[]>([]);
+
+  const allSelected = projects.length > 0 && selectedIds.length === projects.length;
+
+  const toggleAll = () => {
+    setSelectedIds(allSelected ? [] : projects.map((p) => p.id));
+  };
+
+  const toggleOne = (id: string) => {
+    setSelectedIds((ids) => (ids.includes(id) ? ids.filter((i) => i !== id) : [...ids, id]));
+  };
+
+  const bulkUpdate = (patch: Partial<Project>) => {
+    selectedIds.forEach((id) => updateProject(id, patch));
+  };
+
+  const bulkDelete = () => {
+    selectedIds.forEach((id) => removeProject(id));
+    setSelectedIds([]);
+  };
 
   return (
     <div className="space-y-2">
@@ -33,10 +54,74 @@ export function ProjectSheet() {
           <Download size={14} /> Export CSV
         </button>
       </div>
+      {selectedIds.length > 0 && (
+        <div className="flex flex-wrap items-center gap-2 rounded-lg border border-neutral-900 dark:border-white bg-neutral-50 dark:bg-neutral-900 px-3 py-2 text-sm">
+          <span className="font-medium">{selectedIds.length} selected</span>
+          <select
+            defaultValue=""
+            onChange={(e) => {
+              if (e.target.value) bulkUpdate({ status: e.target.value as ProjectStatus });
+              e.target.value = "";
+            }}
+            className="rounded-md border border-neutral-300 dark:border-neutral-700 bg-transparent px-2 py-1 text-sm"
+          >
+            <option value="" disabled>
+              Set status...
+            </option>
+            {STATUSES.map((s) => (
+              <option key={s} value={s}>
+                {s}
+              </option>
+            ))}
+          </select>
+          <select
+            defaultValue=""
+            onChange={(e) => {
+              if (e.target.value) bulkUpdate({ priority: e.target.value as ProjectPriority });
+              e.target.value = "";
+            }}
+            className="rounded-md border border-neutral-300 dark:border-neutral-700 bg-transparent px-2 py-1 text-sm"
+          >
+            <option value="" disabled>
+              Set priority...
+            </option>
+            {PRIORITIES.map((p) => (
+              <option key={p} value={p}>
+                {p}
+              </option>
+            ))}
+          </select>
+          <input
+            placeholder="Set owner..."
+            onKeyDown={(e) => {
+              if (e.key === "Enter" && e.currentTarget.value.trim()) {
+                bulkUpdate({ owner: e.currentTarget.value.trim() });
+                e.currentTarget.value = "";
+              }
+            }}
+            className="rounded-md border border-neutral-300 dark:border-neutral-700 bg-transparent px-2 py-1 text-sm w-32"
+          />
+          <button
+            onClick={bulkDelete}
+            className="flex items-center gap-1 rounded-md px-2 py-1 text-sm text-red-600 hover:bg-red-50 dark:hover:bg-red-950/40"
+          >
+            <Trash2 size={14} /> Delete
+          </button>
+          <button
+            onClick={() => setSelectedIds([])}
+            className="ml-auto flex items-center gap-1 text-sm text-neutral-500 hover:text-neutral-800 dark:hover:text-neutral-200"
+          >
+            <X size={14} /> Clear
+          </button>
+        </div>
+      )}
       <div className="overflow-auto rounded-lg border border-neutral-200 dark:border-neutral-800">
       <table className="min-w-full text-sm">
         <thead className="sticky top-0 bg-neutral-100 dark:bg-neutral-900 z-10">
           <tr>
+            <th className="w-8 px-2">
+              <input type="checkbox" checked={allSelected} onChange={toggleAll} />
+            </th>
             <th className="w-8" />
             {PROJECT_COLUMNS.map((c) => (
               <th key={c.key} className="px-3 py-2 text-left font-medium text-neutral-600 dark:text-neutral-300 whitespace-nowrap">
@@ -49,6 +134,9 @@ export function ProjectSheet() {
         <tbody>
           {projects.map((p) => (
             <tr key={p.id} className="border-t border-neutral-200 dark:border-neutral-800 hover:bg-neutral-50 dark:hover:bg-neutral-900/50">
+              <td className="px-2">
+                <input type="checkbox" checked={selectedIds.includes(p.id)} onChange={() => toggleOne(p.id)} />
+              </td>
               <td className="px-2">
                 <span className="inline-block w-3 h-3 rounded-full" style={{ background: p.color }} />
               </td>
