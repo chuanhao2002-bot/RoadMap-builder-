@@ -4,6 +4,7 @@ import { useCallback, useMemo, useRef, useState } from "react";
 import { useFilteredProjects } from "@/lib/useFilteredProjects";
 import { useProjectStore } from "@/store/useProjectStore";
 import { computeYearLayout, daysBetween, groupBy } from "@/lib/timelineLayout";
+import { getAtRiskInfo } from "@/lib/dependencies";
 import type { Project } from "@/types/project";
 import { ExportMenu } from "./ExportMenu";
 
@@ -293,6 +294,17 @@ export function TimelineRoadmap() {
                             title={`Milestone: ${project.name}`}
                           />
                         )}
+                        {bar &&
+                          (() => {
+                            const atRisk = getAtRiskInfo(project, projects);
+                            return atRisk ? (
+                              <div
+                                className="absolute top-1 w-2.5 h-2.5 rounded-full bg-amber-400 ring-2 ring-white dark:ring-neutral-950 shadow"
+                                style={{ left: `calc(${bar.leftPct}% - 2px)`, zIndex: 5 }}
+                                title={`At risk: starts before "${atRisk.blockedBy.name}" finishes`}
+                              />
+                            ) : null;
+                          })()}
                         {bar && (
                           <div
                             className="group absolute top-2 bottom-2 rounded-full overflow-visible shadow-sm ring-1 ring-black/5 transition-all hover:shadow-md hover:brightness-105"
@@ -341,6 +353,23 @@ export function TimelineRoadmap() {
                                       }`}
                                     >
                                       {slip.text}
+                                    </p>
+                                  ) : null;
+                                })()}
+                                {project.dependsOn.length > 0 && (
+                                  <p className="mt-1 text-xs text-neutral-400 dark:text-neutral-500">
+                                    Depends on:{" "}
+                                    {project.dependsOn
+                                      .map((id) => projects.find((p) => p.id === id)?.name)
+                                      .filter(Boolean)
+                                      .join(", ") || "—"}
+                                  </p>
+                                )}
+                                {(() => {
+                                  const atRisk = getAtRiskInfo(project, projects);
+                                  return atRisk ? (
+                                    <p className="mt-1 text-xs font-medium text-amber-500">
+                                      ⚠ At risk — starts before &quot;{atRisk.blockedBy.name}&quot; finishes
                                     </p>
                                   ) : null;
                                 })()}

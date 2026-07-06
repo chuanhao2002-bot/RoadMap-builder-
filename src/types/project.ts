@@ -20,6 +20,7 @@ export interface Project {
   actualStartDate: string;
   actualEndDate: string;
   updatedAt: string;
+  dependsOn: string[];
 }
 
 export const PROJECT_COLUMNS: { key: keyof Project; label: string }[] = [

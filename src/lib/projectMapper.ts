@@ -19,6 +19,7 @@ export interface ProjectRow {
   actual_start_date: string | null;
   actual_end_date: string | null;
   updated_at: string | null;
+  depends_on: string[] | null;
 }
 
 export function rowToProject(row: ProjectRow): Project {
@@ -41,6 +42,7 @@ export function rowToProject(row: ProjectRow): Project {
     actualStartDate: row.actual_start_date ?? "",
     actualEndDate: row.actual_end_date ?? "",
     updatedAt: row.updated_at ?? "",
+    dependsOn: row.depends_on ?? [],
   };
 }
 
@@ -62,5 +64,6 @@ export function projectToRow(p: Partial<Project>) {
   if (p.progress !== undefined) row.progress = p.progress;
   if (p.actualStartDate !== undefined) row.actual_start_date = p.actualStartDate || null;
   if (p.actualEndDate !== undefined) row.actual_end_date = p.actualEndDate || null;
+  if (p.dependsOn !== undefined) row.depends_on = p.dependsOn;
   return row;
 }

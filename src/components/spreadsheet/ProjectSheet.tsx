@@ -153,6 +153,9 @@ export function ProjectSheet() {
                 {c.label}
               </th>
             ))}
+            <th className="px-3 py-2 text-left font-medium text-neutral-600 dark:text-neutral-300 whitespace-nowrap">
+              Depends On
+            </th>
             <th className="w-16" />
           </tr>
         </thead>
@@ -230,6 +233,11 @@ export function ProjectSheet() {
                   <span className="text-xs text-neutral-500 w-8 text-right">{p.progress}%</span>
                 </div>
               </td>
+              <DependsOnCell
+                project={p}
+                allProjects={projects}
+                onChange={(ids) => updateProject(p.id, { dependsOn: ids })}
+              />
               <td className="px-2 py-1 whitespace-nowrap">
                 <button onClick={() => duplicateProject(p.id)} className="p-1 text-neutral-400 hover:text-neutral-700">
                   <Copy size={14} />
@@ -334,6 +342,58 @@ function SlippageBadge({ endDate, actualEndDate }: { endDate: string; actualEndD
     >
       {text}
     </span>
+  );
+}
+
+function DependsOnCell({
+  project,
+  allProjects,
+  onChange,
+}: {
+  project: Project;
+  allProjects: Project[];
+  onChange: (ids: string[]) => void;
+}) {
+  const [open, setOpen] = useState(false);
+  const options = allProjects.filter((p) => p.id !== project.id);
+  const selectedNames = project.dependsOn
+    .map((id) => allProjects.find((p) => p.id === id)?.name)
+    .filter((n): n is string => !!n);
+
+  const toggle = (id: string) => {
+    onChange(project.dependsOn.includes(id) ? project.dependsOn.filter((i) => i !== id) : [...project.dependsOn, id]);
+  };
+
+  return (
+    <td className="px-3 py-1 relative">
+      <button
+        onClick={() => setOpen((o) => !o)}
+        className="w-full text-left truncate rounded-md px-1.5 py-1 text-sm hover:bg-neutral-50 dark:hover:bg-neutral-900 min-w-[8rem]"
+      >
+        {selectedNames.length > 0 ? (
+          <span className="truncate">{selectedNames.join(", ")}</span>
+        ) : (
+          <span className="italic text-neutral-400">None</span>
+        )}
+      </button>
+      {open && (
+        <>
+          <div className="fixed inset-0 z-10" onClick={() => setOpen(false)} />
+          <div className="absolute z-20 mt-1 min-w-[200px] max-h-56 overflow-auto rounded-md border border-neutral-200 dark:border-neutral-800 bg-white dark:bg-neutral-950 shadow-lg p-1">
+            {options.length === 0 && <div className="px-2 py-1 text-xs text-neutral-400">No other projects</div>}
+            {options.map((o) => (
+              <label
+                key={o.id}
+                className="flex items-center gap-2 px-2 py-1 text-sm rounded hover:bg-neutral-100 dark:hover:bg-neutral-900 cursor-pointer"
+              >
+                <input type="checkbox" checked={project.dependsOn.includes(o.id)} onChange={() => toggle(o.id)} />
+                <span className="truncate">{o.name}</span>
+              </label>
+            ))}
+          </div>
+        </>
+      )}
+    </td>
   );
 }
 

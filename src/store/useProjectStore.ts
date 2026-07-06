@@ -29,6 +29,7 @@ const seedProjects: Omit<Project, "id">[] = [
     actualStartDate: "",
     actualEndDate: "",
     updatedAt: "",
+    dependsOn: [],
   },
   {
     name: "AI Search",
@@ -48,6 +49,7 @@ const seedProjects: Omit<Project, "id">[] = [
     actualStartDate: "",
     actualEndDate: "",
     updatedAt: "",
+    dependsOn: [],
   },
   {
     name: "Payments Overhaul",
@@ -67,6 +69,7 @@ const seedProjects: Omit<Project, "id">[] = [
     actualStartDate: "",
     actualEndDate: "",
     updatedAt: "",
+    dependsOn: [],
   },
 ];
 
@@ -174,6 +177,7 @@ export const useProjectStore = create<ProjectStore>()((set, get) => ({
       actualStartDate: "",
       actualEndDate: "",
       updatedAt: "",
+      dependsOn: [],
       ...p,
     };
     set((s) => ({ projects: [...s.projects, optimistic] }));

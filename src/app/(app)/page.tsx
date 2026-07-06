@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useMemo } from "react";
 import { useProjectStore } from "@/store/useProjectStore";
 import { STATUSES, PRIORITIES } from "@/lib/projectOptions";
+import { getAllAtRisk } from "@/lib/dependencies";
 import type { Project } from "@/types/project";
 
 const PALETTE = ["#3b82f6", "#a855f7", "#f97316", "#10b981", "#ec4899", "#06b6d4", "#eab308", "#ef4444"];
@@ -73,6 +74,8 @@ export default function Dashboard() {
     [projects]
   );
 
+  const dependencyRisk = useMemo(() => getAllAtRisk(projects).slice(0, 6), [projects]);
+
   const onTimeStats = useMemo(() => {
     const withActual = projects.filter((p) => p.actualEndDate && p.endDate);
     if (withActual.length === 0) return null;
@@ -140,6 +143,18 @@ export default function Dashboard() {
           }))}
         />
       </div>
+
+      <ListPanel
+        title="Dependency Risk"
+        empty="No dependency conflicts."
+        items={dependencyRisk.map(({ project, blockedBy }) => ({
+          id: project.id,
+          color: project.color,
+          primary: `${project.name} → blocked by ${blockedBy.name}`,
+          secondary: "At risk",
+          danger: true,
+        }))}
+      />
 
       <div>
         <h2 className="text-sm font-medium text-neutral-500 mb-2">Recently Edited</h2>
