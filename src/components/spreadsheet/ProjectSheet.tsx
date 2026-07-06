@@ -4,11 +4,10 @@ import { useState } from "react";
 import { useProjectStore } from "@/store/useProjectStore";
 import { useFilteredProjects } from "@/lib/useFilteredProjects";
 import { PROJECT_COLUMNS, type Project, type ProjectStatus, type ProjectPriority } from "@/types/project";
+import { STATUSES, PRIORITIES } from "@/lib/projectOptions";
 import { exportProjectsAsCsv } from "@/lib/exportCsv";
 import { Plus, Copy, Trash2, Download, X } from "lucide-react";
 
-const STATUSES: ProjectStatus[] = ["Planning", "In Progress", "Blocked", "Completed"];
-const PRIORITIES: ProjectPriority[] = ["Low", "Medium", "High", "Critical"];
 const COLOR_PRESETS = [
   "#3b82f6",
   "#a855f7",

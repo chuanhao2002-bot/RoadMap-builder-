@@ -4,9 +4,8 @@ import { useRef, useState } from "react";
 import { useProjectStore } from "@/store/useProjectStore";
 import { useFilteredProjects } from "@/lib/useFilteredProjects";
 import type { Project, ProjectStatus } from "@/types/project";
+import { STATUSES as COLUMNS } from "@/lib/projectOptions";
 import { ExportMenu } from "./ExportMenu";
-
-const COLUMNS: ProjectStatus[] = ["Planning", "In Progress", "Blocked", "Completed"];
 
 export function KanbanBoard() {
   const { updateProject } = useProjectStore();

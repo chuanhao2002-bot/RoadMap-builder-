@@ -4,7 +4,16 @@ import { useCallback, useMemo, useRef, useState } from "react";
 import { useFilteredProjects } from "@/lib/useFilteredProjects";
 import { useProjectStore } from "@/store/useProjectStore";
 import { computeYearLayout, daysBetween, groupBy } from "@/lib/timelineLayout";
+import type { Project } from "@/types/project";
 import { ExportMenu } from "./ExportMenu";
+
+const GROUP_FIELDS: { key: keyof Project; label: string }[] = [
+  { key: "category", label: "Category" },
+  { key: "department", label: "Request By" },
+  { key: "owner", label: "Owner" },
+  { key: "status", label: "Status" },
+  { key: "priority", label: "Priority" },
+];
 
 const CATEGORY_DOT_COLORS = [
   "#3b82f6",
@@ -127,8 +136,13 @@ export function TimelineRoadmap() {
   }, [projects]);
 
   const [year, setYear] = useState(defaultYear);
+  const [groupField, setGroupField] = useState<keyof Project>("category");
+  const groupLabel = GROUP_FIELDS.find((f) => f.key === groupField)?.label ?? "Category";
 
-  const groups = useMemo(() => groupBy(projects, (p) => p.category || "Uncategorized"), [projects]);
+  const groups = useMemo(
+    () => groupBy(projects, (p) => String(p[groupField] || "Ungrouped")),
+    [projects, groupField]
+  );
   const { bars, months } = useMemo(() => computeYearLayout(projects, year), [projects, year]);
   const barByProjectId = useMemo(() => new Map(bars.map((b) => [b.project.id, b])), [bars]);
 
@@ -151,21 +165,37 @@ export function TimelineRoadmap() {
   return (
     <div className="space-y-3">
       <div className="flex items-center justify-between">
-        <div className="relative">
-          <select
-            value={year}
-            onChange={(e) => setYear(Number(e.target.value))}
-            className="appearance-none rounded-md border border-neutral-200 dark:border-neutral-800 bg-white dark:bg-neutral-950 pl-3 pr-7 py-1.5 text-sm font-medium shadow-sm hover:border-neutral-300 dark:hover:border-neutral-700 transition-colors"
-          >
-            {yearOptions.map((y) => (
-              <option key={y} value={y}>
-                {y}
-              </option>
-            ))}
-          </select>
-          <svg className="pointer-events-none absolute right-2 top-1/2 -translate-y-1/2 text-neutral-400" width="10" height="10" viewBox="0 0 10 10" fill="none">
-            <path d="M2 3.5L5 6.5L8 3.5" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
-          </svg>
+        <div className="flex items-center gap-2">
+          <div className="relative">
+            <select
+              value={year}
+              onChange={(e) => setYear(Number(e.target.value))}
+              className="appearance-none rounded-md border border-neutral-200 dark:border-neutral-800 bg-white dark:bg-neutral-950 pl-3 pr-7 py-1.5 text-sm font-medium shadow-sm hover:border-neutral-300 dark:hover:border-neutral-700 transition-colors"
+            >
+              {yearOptions.map((y) => (
+                <option key={y} value={y}>
+                  {y}
+                </option>
+              ))}
+            </select>
+            <svg className="pointer-events-none absolute right-2 top-1/2 -translate-y-1/2 text-neutral-400" width="10" height="10" viewBox="0 0 10 10" fill="none">
+              <path d="M2 3.5L5 6.5L8 3.5" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+            </svg>
+          </div>
+          <label className="text-sm text-neutral-500 flex items-center gap-2">
+            Group by
+            <select
+              value={groupField}
+              onChange={(e) => setGroupField(e.target.value as keyof Project)}
+              className="rounded-md border border-neutral-200 dark:border-neutral-800 bg-white dark:bg-neutral-950 px-2 py-1.5 text-sm shadow-sm hover:border-neutral-300 dark:hover:border-neutral-700 transition-colors"
+            >
+              {GROUP_FIELDS.map((f) => (
+                <option key={f.key} value={f.key}>
+                  {f.label}
+                </option>
+              ))}
+            </select>
+          </label>
         </div>
         <ExportMenu containerRef={containerRef} filenameBase="roadmap-timeline" />
       </div>
@@ -189,7 +219,7 @@ export function TimelineRoadmap() {
             <thead className="sticky top-0 z-10">
               <tr className="bg-neutral-50/95 dark:bg-neutral-900/95 backdrop-blur">
                 <th className="px-3 py-2.5 text-left text-xs font-semibold uppercase tracking-wide text-neutral-500 dark:text-neutral-400 border-b border-neutral-200 dark:border-neutral-800">
-                  Category
+                  {groupLabel}
                 </th>
                 <th className="p-0 border-b border-neutral-200 dark:border-neutral-800">
                   <div className="relative flex h-full">

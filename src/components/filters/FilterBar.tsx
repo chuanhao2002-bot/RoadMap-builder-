@@ -4,11 +4,8 @@ import { useState } from "react";
 import { useProjectStore } from "@/store/useProjectStore";
 import { useFilterStore } from "@/store/useFilterStore";
 import { isFiltersEmpty } from "@/types/filters";
-import type { ProjectStatus, ProjectPriority } from "@/types/project";
+import { STATUSES, PRIORITIES } from "@/lib/projectOptions";
 import { Search, X, Bookmark, Trash2 } from "lucide-react";
-
-const STATUSES: ProjectStatus[] = ["Planning", "In Progress", "Blocked", "Completed"];
-const PRIORITIES: ProjectPriority[] = ["Low", "Medium", "High", "Critical"];
 
 function toggle<T>(arr: T[], value: T): T[] {
   return arr.includes(value) ? arr.filter((v) => v !== value) : [...arr, value];
