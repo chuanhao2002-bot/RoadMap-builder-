@@ -15,6 +15,9 @@ export interface ProjectRow {
   milestone: boolean;
   target_goal: string | null;
   mandays: string | null;
+  progress: number | null;
+  actual_start_date: string | null;
+  actual_end_date: string | null;
 }
 
 export function rowToProject(row: ProjectRow): Project {
@@ -33,6 +36,9 @@ export function rowToProject(row: ProjectRow): Project {
     milestone: row.milestone,
     targetGoal: row.target_goal ?? "",
     mandays: row.mandays ?? "",
+    progress: row.progress ?? 0,
+    actualStartDate: row.actual_start_date ?? "",
+    actualEndDate: row.actual_end_date ?? "",
   };
 }
 
@@ -51,5 +57,8 @@ export function projectToRow(p: Partial<Project>) {
   if (p.milestone !== undefined) row.milestone = p.milestone;
   if (p.targetGoal !== undefined) row.target_goal = p.targetGoal;
   if (p.mandays !== undefined) row.mandays = p.mandays;
+  if (p.progress !== undefined) row.progress = p.progress;
+  if (p.actualStartDate !== undefined) row.actual_start_date = p.actualStartDate || null;
+  if (p.actualEndDate !== undefined) row.actual_end_date = p.actualEndDate || null;
   return row;
 }

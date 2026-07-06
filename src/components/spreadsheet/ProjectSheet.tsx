@@ -163,6 +163,25 @@ export function ProjectSheet() {
                   className="bg-transparent outline-none"
                 />
               </td>
+              <td className="px-3 py-1">
+                <input
+                  type="date"
+                  value={p.actualStartDate}
+                  onChange={(e) => updateProject(p.id, { actualStartDate: e.target.value })}
+                  className="bg-transparent outline-none"
+                />
+              </td>
+              <td className="px-3 py-1">
+                <div className="flex items-center gap-1.5">
+                  <input
+                    type="date"
+                    value={p.actualEndDate}
+                    onChange={(e) => updateProject(p.id, { actualEndDate: e.target.value })}
+                    className="bg-transparent outline-none"
+                  />
+                  <SlippageBadge endDate={p.endDate} actualEndDate={p.actualEndDate} />
+                </div>
+              </td>
               <ColorCell value={p.color} onChange={(v) => updateProject(p.id, { color: v })} />
               <td className="px-3 py-1 text-center">
                 <input
@@ -173,6 +192,19 @@ export function ProjectSheet() {
               </td>
               <Cell value={p.targetGoal} onChange={(v) => updateProject(p.id, { targetGoal: v })} />
               <Cell value={p.mandays} onChange={(v) => updateProject(p.id, { mandays: v })} />
+              <td className="px-3 py-1">
+                <div className="flex items-center gap-2 min-w-[7rem]">
+                  <input
+                    type="range"
+                    min={0}
+                    max={100}
+                    value={p.progress}
+                    onChange={(e) => updateProject(p.id, { progress: Number(e.target.value) })}
+                    className="w-16"
+                  />
+                  <span className="text-xs text-neutral-500 w-8 text-right">{p.progress}%</span>
+                </div>
+              </td>
               <td className="px-2 py-1 whitespace-nowrap">
                 <button onClick={() => duplicateProject(p.id)} className="p-1 text-neutral-400 hover:text-neutral-700">
                   <Copy size={14} />
@@ -256,6 +288,27 @@ function ColorCell({ value, onChange }: { value: string; onChange: (v: string) =
         />
       </div>
     </td>
+  );
+}
+
+function SlippageBadge({ endDate, actualEndDate }: { endDate: string; actualEndDate: string }) {
+  if (!actualEndDate || !endDate) return null;
+  const planned = new Date(endDate);
+  const actual = new Date(actualEndDate);
+  if (Number.isNaN(planned.getTime()) || Number.isNaN(actual.getTime())) return null;
+  const diffDays = Math.round((actual.getTime() - planned.getTime()) / 86400000);
+  const late = diffDays > 0;
+  const text = diffDays === 0 ? "On time" : late ? `+${diffDays}d` : `${Math.abs(diffDays)}d early`;
+  return (
+    <span
+      className={`shrink-0 rounded-full px-1.5 py-0.5 text-[10px] font-medium whitespace-nowrap ${
+        late
+          ? "bg-red-100 text-red-600 dark:bg-red-950/50 dark:text-red-400"
+          : "bg-emerald-100 text-emerald-600 dark:bg-emerald-950/50 dark:text-emerald-400"
+      }`}
+    >
+      {text}
+    </span>
   );
 }
 

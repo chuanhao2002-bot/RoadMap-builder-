@@ -19,6 +19,16 @@ const CATEGORY_DOT_COLORS = [
 const MARQUEE_PAUSE_MS = 600;
 const MARQUEE_PX_PER_SEC = 40;
 
+function slippageLabel(endDate: string, actualEndDate: string): { text: string; late: boolean } | null {
+  if (!actualEndDate || !endDate) return null;
+  const planned = new Date(endDate);
+  const actual = new Date(actualEndDate);
+  if (Number.isNaN(planned.getTime()) || Number.isNaN(actual.getTime())) return null;
+  const diffDays = Math.round((actual.getTime() - planned.getTime()) / 86400000);
+  if (diffDays <= 0) return { text: diffDays === 0 ? "On time" : `${Math.abs(diffDays)}d early`, late: false };
+  return { text: `${diffDays}d late`, late: true };
+}
+
 function useHoverMarquee<T extends HTMLInputElement>() {
   const frame = useRef<number | null>(null);
 
@@ -266,6 +276,10 @@ export function TimelineRoadmap() {
                               setHoveredId((id) => (id === project.id ? null : id))
                             }
                           >
+                            <div
+                              className="absolute inset-y-0 left-0 bg-white/25 pointer-events-none"
+                              style={{ width: `${project.progress}%` }}
+                            />
                             <span className="absolute inset-0 flex items-center px-2.5 rounded-full overflow-hidden text-xs font-medium text-white truncate">
                               {project.name}
                               {project.milestone && <span className="ml-1">🚩</span>}
@@ -286,8 +300,20 @@ export function TimelineRoadmap() {
                                   {project.description || "No description"}
                                 </p>
                                 <p className="mt-1 text-xs text-neutral-400 dark:text-neutral-500">
-                                  Mandays: {project.mandays || "—"}
+                                  Mandays: {project.mandays || "—"} · Progress: {project.progress}%
                                 </p>
+                                {(() => {
+                                  const slip = slippageLabel(project.endDate, project.actualEndDate);
+                                  return slip ? (
+                                    <p
+                                      className={`mt-1 text-xs font-medium ${
+                                        slip.late ? "text-red-500" : "text-emerald-500"
+                                      }`}
+                                    >
+                                      {slip.text}
+                                    </p>
+                                  ) : null;
+                                })()}
                               </div>
                             )}
                           </div>

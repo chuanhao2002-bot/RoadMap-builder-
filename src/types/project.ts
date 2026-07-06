@@ -16,6 +16,9 @@ export interface Project {
   milestone: boolean;
   targetGoal: string;
   mandays: string;
+  progress: number;
+  actualStartDate: string;
+  actualEndDate: string;
 }
 
 export const PROJECT_COLUMNS: { key: keyof Project; label: string }[] = [
@@ -28,8 +31,11 @@ export const PROJECT_COLUMNS: { key: keyof Project; label: string }[] = [
   { key: "priority", label: "Priority" },
   { key: "startDate", label: "Start Date" },
   { key: "endDate", label: "End Date" },
+  { key: "actualStartDate", label: "Actual Start" },
+  { key: "actualEndDate", label: "Actual End" },
   { key: "color", label: "Color" },
   { key: "milestone", label: "Milestone" },
   { key: "targetGoal", label: "Target Goal" },
   { key: "mandays", label: "Mandays" },
+  { key: "progress", label: "Progress" },
 ];
