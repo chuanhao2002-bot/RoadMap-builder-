@@ -2,12 +2,13 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { LayoutDashboard, Table2, GanttChartSquare, Settings, PanelLeftClose } from "lucide-react";
+import { LayoutDashboard, Table2, GanttChartSquare, ListTodo, Settings, PanelLeftClose } from "lucide-react";
 
 const NAV = [
   { href: "/", label: "Dashboard", icon: LayoutDashboard },
   { href: "/projects", label: "Projects", icon: Table2 },
   { href: "/views", label: "Views", icon: GanttChartSquare },
+  { href: "/todos", label: "To-Do", icon: ListTodo },
   { href: "/settings", label: "Settings", icon: Settings },
 ];
 
