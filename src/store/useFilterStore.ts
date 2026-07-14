@@ -18,7 +18,8 @@ interface FilterStore {
   activeSavedViewId: string | null;
   savedViews: SavedView[];
   loaded: boolean;
-  init: () => Promise<void>;
+  workspaceId: string | null;
+  init: (workspaceId: string) => Promise<void>;
   reset: () => void;
   setFilters: (patch: Partial<ProjectFilters>) => void;
   resetFilters: () => void;
@@ -32,16 +33,18 @@ export const useFilterStore = create<FilterStore>()((set, get) => ({
   activeSavedViewId: null,
   savedViews: [],
   loaded: false,
+  workspaceId: null,
 
-  init: async () => {
-    if (get().loaded) return;
+  init: async (workspaceId) => {
+    if (get().loaded && get().workspaceId === workspaceId) return;
     savedViewsRealtimeUnsubscribe?.();
-    set({ loaded: false, savedViews: [] });
+    set({ loaded: false, savedViews: [], workspaceId });
 
     const supabase = createClient();
     const { data, error } = await supabase
       .from("saved_views")
       .select("id, name, filters")
+      .eq("workspace_id", workspaceId)
       .order("created_at", { ascending: true });
 
     if (error) {
@@ -55,10 +58,10 @@ export const useFilterStore = create<FilterStore>()((set, get) => ({
     set({ savedViews: rows.map((r) => ({ id: r.id, name: r.name, filters: r.filters })), loaded: true });
 
     const channel = supabase
-      .channel("saved-views-shared")
+      .channel(`saved-views-${workspaceId}`)
       .on(
         "postgres_changes",
-        { event: "*", schema: "public", table: "saved_views" },
+        { event: "*", schema: "public", table: "saved_views", filter: `workspace_id=eq.${workspaceId}` },
         (payload) => {
           set((s) => {
             if (payload.eventType === "DELETE") {
@@ -89,7 +92,7 @@ export const useFilterStore = create<FilterStore>()((set, get) => ({
   reset: () => {
     savedViewsRealtimeUnsubscribe?.();
     savedViewsRealtimeUnsubscribe = null;
-    set({ savedViews: [], loaded: false, filters: EMPTY_FILTERS, activeSavedViewId: null });
+    set({ savedViews: [], loaded: false, filters: EMPTY_FILTERS, activeSavedViewId: null, workspaceId: null });
   },
 
   setFilters: (patch) =>
@@ -99,10 +102,12 @@ export const useFilterStore = create<FilterStore>()((set, get) => ({
 
   saveCurrentAsView: (name) => {
     const filters = get().filters;
+    const workspaceId = get().workspaceId;
+    if (!workspaceId) return;
     const supabase = createClient();
     supabase
       .from("saved_views")
-      .insert({ name, filters })
+      .insert({ name, filters, workspace_id: workspaceId })
       .select("id, name, filters")
       .single()
       .then(({ data, error }) => {

@@ -15,7 +15,8 @@ let realtimeUnsubscribe: (() => void) | null = null;
 interface TodoStore {
   todos: Todo[];
   loaded: boolean;
-  init: () => Promise<void>;
+  workspaceId: string | null;
+  init: (workspaceId: string) => Promise<void>;
   reset: () => void;
   addTodo: (t?: Partial<Todo>) => void;
   updateTodo: (id: string, patch: Partial<Todo>) => void;
@@ -25,16 +26,18 @@ interface TodoStore {
 export const useTodoStore = create<TodoStore>()((set, get) => ({
   todos: [],
   loaded: false,
+  workspaceId: null,
 
-  init: async () => {
-    if (get().loaded) return;
+  init: async (workspaceId) => {
+    if (get().loaded && get().workspaceId === workspaceId) return;
     realtimeUnsubscribe?.();
-    set({ loaded: false, todos: [] });
+    set({ loaded: false, todos: [], workspaceId });
 
     const supabase = createClient();
     const { data, error } = await supabase
       .from("todos")
       .select("*")
+      .eq("workspace_id", workspaceId)
       .order("created_at", { ascending: true });
 
     if (error) {
@@ -47,19 +50,23 @@ export const useTodoStore = create<TodoStore>()((set, get) => ({
     set({ todos: ((data ?? []) as TodoRow[]).map(rowToTodo), loaded: true });
 
     const channel = supabase
-      .channel("todos-shared")
-      .on("postgres_changes", { event: "*", schema: "public", table: "todos" }, (payload) => {
-        set((s) => {
-          if (payload.eventType === "DELETE") {
-            return { todos: s.todos.filter((t) => t.id !== (payload.old as TodoRow).id) };
-          }
-          const incoming = rowToTodo(payload.new as TodoRow);
-          const exists = s.todos.some((t) => t.id === incoming.id);
-          return {
-            todos: exists ? s.todos.map((t) => (t.id === incoming.id ? incoming : t)) : [...s.todos, incoming],
-          };
-        });
-      })
+      .channel(`todos-${workspaceId}`)
+      .on(
+        "postgres_changes",
+        { event: "*", schema: "public", table: "todos", filter: `workspace_id=eq.${workspaceId}` },
+        (payload) => {
+          set((s) => {
+            if (payload.eventType === "DELETE") {
+              return { todos: s.todos.filter((t) => t.id !== (payload.old as TodoRow).id) };
+            }
+            const incoming = rowToTodo(payload.new as TodoRow);
+            const exists = s.todos.some((t) => t.id === incoming.id);
+            return {
+              todos: exists ? s.todos.map((t) => (t.id === incoming.id ? incoming : t)) : [...s.todos, incoming],
+            };
+          });
+        }
+      )
       .subscribe();
 
     realtimeUnsubscribe = () => {
@@ -70,10 +77,12 @@ export const useTodoStore = create<TodoStore>()((set, get) => ({
   reset: () => {
     realtimeUnsubscribe?.();
     realtimeUnsubscribe = null;
-    set({ todos: [], loaded: false });
+    set({ todos: [], loaded: false, workspaceId: null });
   },
 
   addTodo: (t) => {
+    const workspaceId = get().workspaceId;
+    if (!workspaceId) return;
     const optimistic: Todo = {
       id: id(),
       title: "New task",
@@ -90,7 +99,7 @@ export const useTodoStore = create<TodoStore>()((set, get) => ({
     const supabase = createClient();
     supabase
       .from("todos")
-      .insert(todoToRow(optimistic))
+      .insert({ ...todoToRow(optimistic), workspace_id: workspaceId })
       .select("*")
       .single()
       .then(({ data, error }) => {
