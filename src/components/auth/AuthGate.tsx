@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { createClient } from "@/lib/supabase";
 import { useSession } from "@/lib/useSession";
+import { getSiteUrl } from "@/lib/siteUrl";
 
 export function AuthGate({ children }: { children: React.ReactNode }) {
   const { user, loading } = useSession();
@@ -18,7 +19,7 @@ export function AuthGate({ children }: { children: React.ReactNode }) {
     const supabase = createClient();
     const { error: sendError } = await supabase.auth.signInWithOtp({
       email: email.trim(),
-      options: { emailRedirectTo: window.location.href },
+      options: { emailRedirectTo: `${getSiteUrl()}${window.location.pathname}` },
     });
     setSending(false);
     if (sendError) {

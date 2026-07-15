@@ -5,6 +5,7 @@ import { useParams, useRouter } from "next/navigation";
 import { useSession } from "@/lib/useSession";
 import { useWorkspaceStore } from "@/store/useWorkspaceStore";
 import { createClient } from "@/lib/supabase";
+import { getSiteUrl } from "@/lib/siteUrl";
 
 export default function JoinPage() {
   const params = useParams<{ token: string }>();
@@ -33,7 +34,7 @@ export default function JoinPage() {
     const supabase = createClient();
     await supabase.auth.signInWithOtp({
       email: email.trim(),
-      options: { emailRedirectTo: window.location.href },
+      options: { emailRedirectTo: `${getSiteUrl()}/join/${params.token}` },
     });
     setSending(false);
     setSent(true);
