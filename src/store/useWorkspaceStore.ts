@@ -18,6 +18,7 @@ interface WorkspaceStore {
   init: (userId: string) => Promise<void>;
   reset: () => void;
   switchWorkspace: (id: string) => void;
+  renameWorkspace: (id: string, name: string) => Promise<boolean>;
   createInvite: (email: string) => Promise<string | null>;
   acceptInvite: (token: string, userId: string) => Promise<boolean>;
 }
@@ -65,6 +66,23 @@ export const useWorkspaceStore = create<WorkspaceStore>()((set, get) => ({
   switchWorkspace: (id) => {
     if (typeof window !== "undefined") window.localStorage.setItem(CURRENT_WORKSPACE_KEY, id);
     set({ currentWorkspaceId: id });
+  },
+
+  renameWorkspace: async (id, name) => {
+    const trimmed = name.trim();
+    if (!trimmed) return false;
+    const previous = get().workspaces;
+    set((s) => ({ workspaces: s.workspaces.map((w) => (w.id === id ? { ...w, name: trimmed } : w)) }));
+
+    const supabase = createClient();
+    const { error } = await supabase.from("workspaces").update({ name: trimmed }).eq("id", id);
+    if (error) {
+      console.error("Failed to rename workspace", error);
+      useToastStore.getState().push("Failed to rename workspace — only the owner can rename it.");
+      set({ workspaces: previous });
+      return false;
+    }
+    return true;
   },
 
   createInvite: async (email) => {

@@ -4,13 +4,13 @@ import { useState } from "react";
 import { useProjectStore } from "@/store/useProjectStore";
 import { useWorkspaceStore } from "@/store/useWorkspaceStore";
 import { createSnapshot } from "@/lib/snapshots";
-import { Link2, Check, UserPlus } from "lucide-react";
+import { Link2, Check, UserPlus, Pencil } from "lucide-react";
 
 export default function SettingsPage() {
   const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
   const hasKey = Boolean(process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY);
   const projects = useProjectStore((s) => s.projects);
-  const { workspaces, currentWorkspaceId, createInvite } = useWorkspaceStore();
+  const { workspaces, currentWorkspaceId, createInvite, renameWorkspace } = useWorkspaceStore();
   const currentWorkspace = workspaces.find((w) => w.id === currentWorkspaceId);
 
   const [name, setName] = useState("");
@@ -76,6 +76,15 @@ export default function SettingsPage() {
         {currentWorkspace ? ` ("${currentWorkspace.name}")` : ""}. Only people you invite into this
         workspace can see or edit its data.
       </p>
+
+      {currentWorkspace && (
+        <RenameWorkspace
+          key={currentWorkspace.id + currentWorkspace.name}
+          workspaceId={currentWorkspace.id}
+          initialName={currentWorkspace.name}
+          renameWorkspace={renameWorkspace}
+        />
+      )}
 
       <div className="rounded-lg border border-neutral-200 dark:border-neutral-800 p-4 space-y-3">
         <h2 className="text-sm font-semibold">Invite a teammate</h2>
@@ -148,6 +157,59 @@ export default function SettingsPage() {
             </button>
           </div>
         )}
+      </div>
+    </div>
+  );
+}
+
+function RenameWorkspace({
+  workspaceId,
+  initialName,
+  renameWorkspace,
+}: {
+  workspaceId: string;
+  initialName: string;
+  renameWorkspace: (id: string, name: string) => Promise<boolean>;
+}) {
+  const [workspaceName, setWorkspaceName] = useState(initialName);
+  const [renaming, setRenaming] = useState(false);
+  const [renamed, setRenamed] = useState(false);
+
+  const handleRename = async () => {
+    if (workspaceName.trim() === initialName || !workspaceName.trim()) return;
+    setRenaming(true);
+    const ok = await renameWorkspace(workspaceId, workspaceName);
+    setRenaming(false);
+    if (ok) {
+      setRenamed(true);
+      setTimeout(() => setRenamed(false), 1500);
+    }
+  };
+
+  return (
+    <div className="rounded-lg border border-neutral-200 dark:border-neutral-800 p-4 space-y-3">
+      <h2 className="text-sm font-semibold">Workspace name</h2>
+      <p className="text-xs text-neutral-500">
+        Give this workspace a name your teammates will recognize (e.g. &quot;Product Team&quot;) — helpful
+        once you or they belong to more than one workspace.
+      </p>
+      <div className="flex items-center gap-2">
+        <input
+          value={workspaceName}
+          onChange={(e) => setWorkspaceName(e.target.value)}
+          onKeyDown={(e) => {
+            if (e.key === "Enter") handleRename();
+          }}
+          placeholder="Workspace name"
+          className="flex-1 rounded-md border border-neutral-300 dark:border-neutral-700 bg-transparent px-2 py-1.5 text-sm"
+        />
+        <button
+          onClick={handleRename}
+          disabled={renaming || !workspaceName.trim() || workspaceName.trim() === initialName}
+          className="flex items-center gap-1.5 rounded-md bg-neutral-900 dark:bg-white text-white dark:text-neutral-900 px-3 py-1.5 text-sm font-medium hover:opacity-90 disabled:opacity-50"
+        >
+          {renamed ? <Check size={14} /> : <Pencil size={14} />} {renaming ? "Saving..." : renamed ? "Saved" : "Rename"}
+        </button>
       </div>
     </div>
   );
