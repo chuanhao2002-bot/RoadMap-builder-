@@ -23,7 +23,8 @@ export function AuthGate({ children }: { children: React.ReactNode }) {
     });
     setSending(false);
     if (sendError) {
-      setError("Could not send the sign-in link — try again.");
+      console.error("signInWithOtp failed", sendError);
+      setError(sendError.message || "Could not send the sign-in link — try again.");
       return;
     }
     setSent(true);

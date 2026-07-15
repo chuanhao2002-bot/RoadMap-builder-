@@ -17,6 +17,7 @@ export default function JoinPage() {
   const [sent, setSent] = useState(false);
   const [sending, setSending] = useState(false);
   const [status, setStatus] = useState<"idle" | "joined" | "error">("idle");
+  const [sendError, setSendError] = useState<string | null>(null);
   const attempted = useRef(false);
 
   useEffect(() => {
@@ -31,12 +32,18 @@ export default function JoinPage() {
   const handleSendLink = async () => {
     if (!email.trim()) return;
     setSending(true);
+    setSendError(null);
     const supabase = createClient();
-    await supabase.auth.signInWithOtp({
+    const { error } = await supabase.auth.signInWithOtp({
       email: email.trim(),
       options: { emailRedirectTo: `${getSiteUrl()}/join/${params.token}` },
     });
     setSending(false);
+    if (error) {
+      console.error("signInWithOtp failed", error);
+      setSendError(error.message || "Could not send the sign-in link — try again.");
+      return;
+    }
     setSent(true);
   };
 
@@ -73,6 +80,7 @@ export default function JoinPage() {
               >
                 {sending ? "Sending..." : "Send magic link"}
               </button>
+              {sendError && <p className="text-xs text-red-500">{sendError}</p>}
             </>
           )}
         </div>
