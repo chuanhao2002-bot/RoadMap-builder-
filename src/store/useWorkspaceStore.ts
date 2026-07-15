@@ -101,7 +101,8 @@ export const useWorkspaceStore = create<WorkspaceStore>()((set, get) => ({
       .from("workspace_members")
       .insert({ workspace_id: invite.workspace_id, user_id: userId, role: "member" });
 
-    if (joinError && !joinError.message.includes("duplicate")) {
+    // 23505 = unique_violation, i.e. this user is already a member — that's fine.
+    if (joinError && joinError.code !== "23505" && !joinError.message.toLowerCase().includes("duplicate")) {
       console.error("Failed to join workspace", joinError);
       useToastStore.getState().push("Failed to join workspace.");
       return false;
