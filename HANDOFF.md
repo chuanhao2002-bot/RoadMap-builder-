@@ -144,6 +144,32 @@ If everything checks out, there is **no pending migration work** — this was
 just never independently verified against the live DB until now, since all
 prior verification was "does the UI work," not "does the schema match."
 
+### ✅ Verified live (2026-07-18, via Supabase MCP)
+
+The live schema was inspected directly and is **fully correct**: all 7
+tables present with RLS enabled; `workspace_id` NOT NULL + FK'd on
+projects/saved_views/todos; all 12 `*_ws_*` workspace RLS policies present;
+both `is_workspace_member`/`is_workspace_owner` functions present as
+`security definer`; **zero** null `workspace_id` rows (projects 15,
+saved_views 0, todos 5). No pending migration work.
+
+Two non-blocking notes from that verification:
+
+- **The `supabase_migrations` history table only contains 3 rows**
+  (`init_schema`, `remove_auth`, `remove_progress_tags`) — NOT the full
+  `0001`–`0015` set. This is expected and not a problem: migrations `0004`+
+  were applied by pasting SQL into the Supabase **SQL Editor**, which does
+  not record into the migration-tracking table. The *schema* is correct;
+  only the *bookkeeping* is incomplete. Don't be alarmed by this on a future
+  verification — and note that a future `supabase db push` (CLI migrations)
+  could get confused by the gap, so prefer continuing with SQL Editor / MCP
+  `apply_migration` unless you first reconcile the history.
+- **A stray junk table** named after a GitHub URL
+  (`https://github.com/chuanhao2002-bot/Budget-APP/...`), 2 cols, 0 rows,
+  was found — an accidental early creation. Safe to drop (look up its exact
+  full name first; the display truncates it). Drop it if it hasn't been
+  already.
+
 ## Known outstanding items / gaps (not urgent, just not done)
 
 - No member-removal UI (Settings only supports invite + rename so far).
