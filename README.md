@@ -4,8 +4,10 @@ A spreadsheet-driven roadmap planning tool with a separate priority to-do
 list. The Projects spreadsheet is the single source of truth for the
 roadmap — every roadmap visualization is generated from it automatically.
 
-This is a separate Next.js project living in `roadmap-studio/` inside the
-Budget-APP repo. It does not share code with the budget app.
+This is a standalone Next.js project — the app lives at the **repository
+root** (the `package.json` is named `roadmap-studio` for historical reasons,
+but there is no `roadmap-studio/` subdirectory to `cd` into). Clone the repo
+and everything is right there at the top level.
 
 ## Stack
 
@@ -73,18 +75,24 @@ Budget-APP repo. It does not share code with the budget app.
 ## Setup
 
 ```bash
-cd roadmap-studio
+git clone https://github.com/chuanhao2002-bot/RoadMap-builder-.git
+cd RoadMap-builder-
 npm install
 npm run dev
 ```
 
-Create `.env.local`:
+Create `.env.local` in the repo root (it's gitignored, so a fresh clone
+won't have it — you must recreate it):
 
 ```
 NEXT_PUBLIC_SUPABASE_URL=...
 NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY=...
 NEXT_PUBLIC_SITE_URL=http://localhost:3000
 ```
+
+Get the Supabase URL and publishable key from the Supabase dashboard
+(Project Settings → API), or copy them from the existing Vercel project's
+environment variables.
 
 `NEXT_PUBLIC_SITE_URL` pins where magic-link/invite emails redirect back to
 — without it, the app falls back to the current browser origin, which is

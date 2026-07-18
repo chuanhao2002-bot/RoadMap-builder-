@@ -16,10 +16,49 @@ feature list and setup/deploy instructions) — this file covers the
 
 A spreadsheet-driven roadmap planning tool (`/projects`, `/views`) plus a
 completely separate Eisenhower-matrix priority to-do list (`/todos`), both
-multi-tenant via Supabase-backed **workspaces** with real auth. Lives at
-`roadmap-studio/` inside the `Budget-APP` monorepo but shares no code with
-it. Deployed on Vercel, backed by Supabase project `txprazhgiinrxtpgpmia`.
-GitHub remote: `chuanhao2002-bot/RoadMap-builder-`, branch `main`.
+multi-tenant via Supabase-backed **workspaces** with real auth. Deployed on
+Vercel, backed by Supabase project `txprazhgiinrxtpgpmia`. GitHub remote:
+`chuanhao2002-bot/RoadMap-builder-`, branch `main`.
+
+**Repo layout:** this is a **standalone** repo — the Next.js app is at the
+**repository root**. The `package.json` is named `roadmap-studio` for
+historical reasons, but there is **no `roadmap-studio/` subdirectory**. When
+you clone `RoadMap-builder-`, `src/`, `supabase/`, `package.json`, etc. are
+all at the top level — do not `cd roadmap-studio` (that directory does not
+exist and older docs wrongly referenced it).
+
+## Running it locally (a fresh clone won't just work)
+
+`.env.local` is gitignored, so a fresh clone / a different machine will NOT
+have it — and without it the app can't reach Supabase (`npm run dev` and the
+build throw on the missing vars). Recreate `.env.local` in the repo root:
+
+```
+NEXT_PUBLIC_SUPABASE_URL=...
+NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY=...
+NEXT_PUBLIC_SITE_URL=http://localhost:3000
+```
+
+Get the URL + publishable key from the Supabase dashboard (Project Settings
+→ API) or copy them from the existing Vercel project's environment
+variables. Then `npm install` and `npm run dev`.
+
+## Live Supabase dashboard config that is NOT in code or migrations
+
+Two settings the auth flow depends on live only in the Supabase dashboard —
+they are invisible to a code review AND to MCP schema verification (they're
+Auth settings, not schema), so they're easy to lose:
+
+- **"Confirm email" is turned OFF** (Authentication → Sign In / Providers,
+  or the User Signups section). This is *why* email+password signup works
+  without sending any email. If it ever gets turned back on, signups
+  silently break again with "email rate limit exceeded" (Supabase's built-in
+  mailer is heavily throttled).
+- **Redirect URLs allow-list** (Authentication → URL Configuration) must
+  include the production Vercel URL and `http://localhost:3000` — the
+  magic-link/invite fallback fails otherwise.
+
+If the Supabase project is ever recreated, both must be reconfigured by hand.
 
 ## Chronological build history (condensed)
 
