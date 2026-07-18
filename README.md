@@ -1,7 +1,8 @@
 # Roadmap Studio
 
-A spreadsheet-driven roadmap planning tool. The spreadsheet is the single source
-of truth — every roadmap visualization is generated from it automatically.
+A spreadsheet-driven roadmap planning tool with a separate priority to-do
+list. The Projects spreadsheet is the single source of truth for the
+roadmap — every roadmap visualization is generated from it automatically.
 
 This is a separate Next.js project living in `roadmap-studio/` inside the
 Budget-APP repo. It does not share code with the budget app.
@@ -9,44 +10,65 @@ Budget-APP repo. It does not share code with the budget app.
 ## Stack
 
 - Next.js (App Router) + TypeScript + Tailwind CSS
-- Zustand (`src/store/useProjectStore.ts`, `src/store/useFilterStore.ts`) is
-  the local cache layer; data is persisted to Supabase Postgres (projects,
-  saved views), scoped per-user via RLS, with a Realtime subscription
-  keeping the cache in sync
-- Supabase client helper at `src/lib/supabase.ts`; auth via email magic link
-  (`src/components/auth/AuthGate.tsx`)
-- `html-to-image` + `jsPDF` for PNG/SVG/PDF export of the roadmap (`src/lib/exportRoadmap.ts`)
+- Supabase Postgres for persistence, with Zustand stores as a local cache
+  layer and Realtime subscriptions keeping tabs/sessions in sync
+- Supabase Auth (email + password, with magic link as a fallback) —
+  `src/components/auth/AuthForm.tsx`, `AuthGate.tsx`
+- Multi-tenant **workspaces**: every project/to-do/saved view belongs to a
+  workspace; access is controlled by workspace membership (RLS), not a
+  single shared pool
+- `html-to-image` + `jsPDF` + `pptxgenjs` for PNG/SVG/PDF/PPTX export
 
 ## What's implemented
 
-- **Projects spreadsheet** (`/projects`): editable grid (name, description,
-  category, department, owner, status, priority, progress, dates, color,
-  milestone, tags). Add/duplicate/delete rows.
-- **Timeline / Swimlane / Kanban views** (`/views`): SVG Gantt-style roadmap,
-  grouped lanes (by department/category/owner/status/priority), and a
-  drag-and-drop status board — all auto-generated from the spreadsheet via
-  `src/lib/timelineLayout.ts`.
-- **Export**: PNG, SVG, and PDF via the `ExportMenu` on each view (`src/lib/
-  exportRoadmap.ts`). Timeline and Swimlane export all three formats; Kanban
-  exports PNG/PDF (it's a DOM board, not SVG).
+- **Auth & workspaces**: sign up / sign in with email+password (or a magic
+  link). Data is scoped to a **workspace** — invite teammates via a
+  one-time `/join/{token}` link generated in Settings; anyone who accepts
+  it joins the same workspace and sees the same data. Workspaces can be
+  renamed (Settings); switching between multiple workspaces is supported
+  via the sidebar's workspace switcher.
+- **Projects spreadsheet** (`/projects`): editable grid — name, description,
+  category, "Request By", owner, status, priority, start/end dates, actual
+  start/end dates (with an on-time/late slippage badge), color (8 presets +
+  custom), milestone flag, target goal, mandays, progress %, and
+  dependencies ("Depends On" — flags a project as at-risk if it starts
+  before a dependency finishes). Add/duplicate/delete rows, bulk
+  multi-select edit (status/priority/owner/delete), CSV import and export.
+- **Timeline / Swimlane / Kanban views** (`/views`): all auto-generated from
+  the spreadsheet via `src/lib/timelineLayout.ts`.
+  - **Timeline**: full-year Gantt table, configurable grouping (category/
+    request-by/owner/status/priority), milestone markers, a "today" line,
+    hover popover (description, mandays, dependency/at-risk info), marquee
+    auto-scroll on overflowing text.
+  - **Swimlane**: SVG lanes grouped by the same fields.
+  - **Kanban**: drag-and-drop status board with a progress bar per card.
+- **Priority To-Do** (`/todos`): a separate Eisenhower-matrix to-do list
+  (Do / Schedule / Delegate / Eliminate quadrants), independent of the
+  roadmap data. Matrix view (drag cards between quadrants) or List view,
+  quick capture, due dates, done state. One-click **"→ Roadmap"** (or bulk
+  "Add selected to Roadmap") converts a to-do into a roadmap project.
+- **Export**: PNG, SVG, PDF, and PPTX via the `ExportMenu` on each roadmap
+  view (`src/lib/exportRoadmap.ts`, `exportPptx.ts`); CSV import/export on
+  the Projects spreadsheet (`src/lib/importCsv.ts`, `exportCsv.ts`).
 - **Filters + saved views**: search and multi-select filters (status,
-  priority, department, category, owner, date range) via `FilterBar`,
+  priority, request-by, category, owner, date range) via `FilterBar`,
   applied everywhere through `useFilteredProjects()`. Filter sets can be
-  named, saved, and re-applied (`useFilterStore`, persisted).
-- **Presentation mode** (`/present`): fullscreen, sidebar-free view of the
-  roadmap with a Timeline/Swimlane/Kanban switcher, fullscreen + dark mode
-  toggles, keyboard shortcuts (←/→ or 1/2/3 to switch views, `f` for
-  fullscreen, `Esc` to exit), and auto-hiding controls. Reachable via the
-  "Present" button on `/views`. Presenter notes, timer, and laser pointer
-  are not implemented.
-- **Dashboard** (`/`): project counts by status, recently edited list, quick
-  links.
-- **Settings** (`/settings`): shows Supabase connection status and the
-  signed-in account.
-- **Auth + persistence**: email magic-link sign-in (`AuthGate`); projects and
-  saved views are stored in Supabase Postgres under RLS policies scoped to
-  `auth.uid()`, with Zustand as a local cache and Realtime subscriptions on
-  both `projects` and `saved_views` keeping them in sync across tabs/sessions.
+  named, saved, and re-applied per workspace.
+- **Presentation mode** (`/present`, public — no sign-in required):
+  fullscreen, sidebar-free view with a Timeline/Swimlane/Kanban switcher,
+  fullscreen + dark mode toggles, keyboard shortcuts (←/→ or 1/2/3 to
+  switch views, `f` for fullscreen, `Esc` to exit), auto-hiding controls.
+  Presenter notes, timer, and laser pointer are not implemented.
+- **Shareable read-only snapshots** (`/share/[id]`, public — no sign-in
+  required): freeze the current project list into a read-only link from
+  Settings. Frozen at creation time; doesn't update with live data.
+  Deliberately separate from workspace access — anyone with the link can
+  view it.
+- **Dashboard** (`/`): status/priority/owner/category breakdowns, upcoming
+  milestones (next 90 days), overdue/at-risk list, dependency-risk list,
+  on-time delivery %, recently-edited list.
+- **Settings** (`/settings`): Supabase connection status, workspace rename,
+  teammate invite links, shareable snapshot creation.
 
 ## Setup
 
@@ -61,52 +83,75 @@ Create `.env.local`:
 ```
 NEXT_PUBLIC_SUPABASE_URL=...
 NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY=...
+NEXT_PUBLIC_SITE_URL=http://localhost:3000
 ```
 
-Then run `supabase/migrations/0001_init.sql` once in the Supabase project's
-SQL Editor to create the `projects` and `saved_views` tables, RLS policies,
-and `updated_at` triggers.
+`NEXT_PUBLIC_SITE_URL` pins where magic-link/invite emails redirect back to
+— without it, the app falls back to the current browser origin, which is
+unreliable (e.g. a link requested from a local dev server that isn't
+running later will fail). Always set it explicitly per environment.
+
+Run every file in `supabase/migrations/`, **in order**, once in the
+Supabase project's SQL Editor (`0001` through the highest-numbered file).
+They build up the schema incrementally: initial `projects`/`saved_views`
+tables → auth removal/re-addition → field additions (`target_goal`,
+`mandays`, `progress`, actual dates, `depends_on`) → `snapshots` →
+`todos` → `workspaces`/`workspace_members`/`workspace_invites` → workspace
+scoping of existing tables → the RLS cutover from open access to
+membership-based access → an RLS infinite-recursion fix → the workspace
+rename policy. If you're setting up a brand-new Supabase project, you
+still need to run all of them in order (some are corrective and depend on
+earlier ones existing).
+
+After running the migrations, sign up in the app once, then run this in
+the SQL Editor to create your workspace and claim any pre-existing seed
+data (only needed once, when bootstrapping from an already-open dataset):
+
+```sql
+do $$
+declare
+  v_user_id uuid;
+  v_workspace_id uuid;
+begin
+  select id into v_user_id from auth.users where email = 'YOUR_EMAIL_HERE' limit 1;
+  insert into workspaces (name, owner_id) values ('My Workspace', v_user_id)
+  returning id into v_workspace_id;
+  insert into workspace_members (workspace_id, user_id, role)
+  values (v_workspace_id, v_user_id, 'owner');
+  update projects set workspace_id = v_workspace_id where workspace_id is null;
+  update saved_views set workspace_id = v_workspace_id where workspace_id is null;
+  update todos set workspace_id = v_workspace_id where workspace_id is null;
+end $$;
+```
 
 ## Deploy (Vercel)
 
-1. Push this repo to GitHub (already done for this branch).
-2. In the Vercel dashboard: **New Project** → import the repo → set **Root
-   Directory** to `roadmap-studio` (it's a subdirectory of the monorepo, not
-   the repo root). Framework is auto-detected as Next.js.
+1. Push this repo to GitHub (already done — `chuanhao2002-bot/RoadMap-builder-`).
+2. In the Vercel dashboard: **New Project** → import the repo. Framework is
+   auto-detected as Next.js.
 3. Add environment variables in the Vercel project settings (Settings →
    Environment Variables) — these are gitignored locally, so they must be
-   entered manually, not copied from a committed file:
+   entered manually:
    ```
    NEXT_PUBLIC_SUPABASE_URL=...
    NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY=...
+   NEXT_PUBLIC_SITE_URL=https://<your-vercel-domain>
    ```
 4. In Supabase Auth settings (Authentication → URL Configuration), add the
-   Vercel production URL and any preview-deployment URL pattern
-   (`https://*.vercel.app`) to the allowed redirect URLs — magic-link sign-in
-   uses `emailRedirectTo: window.location.origin` (see `AuthGate.tsx`), so
-   links won't redirect correctly in production until this is set.
+   Vercel production URL (and any preview-deployment pattern,
+   `https://*.vercel.app`) to the allowed redirect URLs.
 5. Deploy. Vercel rebuilds automatically on pushes to the connected branch.
 
-## Known gaps vs. the full spec
+## Known gaps
 
-This scaffold covers one view (Timeline) and the core spreadsheet → roadmap
-loop. The original request described a much larger enterprise product
-(real-time multi-user collaboration, AG Grid, 10+ view types, theme designer,
-presentation mode, PPTX/PDF export, AI assistant, integrations with Jira/
-Notion/Slack/etc., RBAC, version history). None of that is implemented — it
-would be a multi-week effort per area. Suggested next milestones, roughly in
-order of value:
-
-1. ~~Wire Supabase~~ — done: schema for projects/saved_views, RLS, magic-link
-   auth, Zustand as local cache over a Supabase-backed store. No team/org
-   sharing yet (single-tenant-per-user RLS model) — that's future work
-   alongside RBAC.
-2. ~~Add Swimlane and Kanban views~~ — done.
-3. ~~Filters + saved views~~ — done.
-4. ~~Presentation mode~~ — done (no presenter notes/timer/laser pointer yet).
-5. ~~PDF/SVG export~~ — done.
-6. ~~Realtime collaboration~~ — done: Realtime subscriptions on `projects`
-   and `saved_views` keep the local Zustand cache in sync across tabs/
-   sessions for the same signed-in user. True multi-user collaboration
-   (presence, shared roadmaps across accounts, live cursors) is still future
-   work, gated on team/org sharing (see item 1's RLS note).
+- No presenter notes/timer/laser pointer in Presentation mode.
+- Timeline dependency links show an at-risk marker + popover text, not
+  drawn connector lines between bars (the table's dynamic row grouping
+  makes accurate cross-row line drawing a separate, larger effort).
+- No member-removal UI yet (only invite + rename); no role management
+  beyond owner/member.
+- No AI assistant, no third-party integrations (Jira/Notion/Slack/etc.),
+  no version history / audit log on projects.
+- Supabase's built-in email sender is rate-limited — password auth is the
+  primary sign-in method for this reason; magic link is a fallback only,
+  and would need custom SMTP configured in Supabase to be reliable at scale.
