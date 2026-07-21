@@ -7,18 +7,8 @@ import { PROJECT_COLUMNS, type Project, type ProjectStatus, type ProjectPriority
 import { STATUSES, PRIORITIES } from "@/lib/projectOptions";
 import { exportProjectsAsCsv } from "@/lib/exportCsv";
 import { parseProjectsCsv } from "@/lib/importCsv";
+import { COLOR_PALETTE, colorForCategory } from "@/lib/colorPalette";
 import { Plus, Copy, Trash2, Download, Upload, X } from "lucide-react";
-
-const COLOR_PRESETS = [
-  "#3b82f6",
-  "#a855f7",
-  "#f97316",
-  "#10b981",
-  "#ec4899",
-  "#06b6d4",
-  "#eab308",
-  "#ef4444",
-];
 
 export function ProjectSheet() {
   const { updateProject, addProject, removeProject, duplicateProject } = useProjectStore();
@@ -170,7 +160,10 @@ export function ProjectSheet() {
               </td>
               <WrapCell value={p.name} onChange={(v) => updateProject(p.id, { name: v })} />
               <WrapCell value={p.description} onChange={(v) => updateProject(p.id, { description: v })} />
-              <Cell value={p.category} onChange={(v) => updateProject(p.id, { category: v })} />
+              <Cell
+                value={p.category}
+                onChange={(v) => updateProject(p.id, { category: v, color: colorForCategory(v) })}
+              />
               <Cell value={p.department} onChange={(v) => updateProject(p.id, { department: v })} />
               <Cell value={p.owner} onChange={(v) => updateProject(p.id, { owner: v })} />
               <SelectCell value={p.status} options={STATUSES} onChange={(v) => updateProject(p.id, { status: v as ProjectStatus })} />
@@ -300,7 +293,7 @@ function ColorCell({ value, onChange }: { value: string; onChange: (v: string) =
   return (
     <td className="px-3 py-1">
       <div className="flex items-center gap-1">
-        {COLOR_PRESETS.map((preset) => (
+        {COLOR_PALETTE.map((preset) => (
           <button
             key={preset}
             type="button"

@@ -5,6 +5,7 @@ import { createClient } from "@/lib/supabase";
 import { projectToRow, rowToProject, type ProjectRow } from "@/lib/projectMapper";
 import type { Project } from "@/types/project";
 import { useToastStore } from "@/store/useToastStore";
+import { colorForCategory } from "@/lib/colorPalette";
 
 function id() {
   return Math.random().toString(36).slice(2, 10);
@@ -174,7 +175,7 @@ export const useProjectStore = create<ProjectStore>()((set, get) => ({
       priority: "Medium",
       startDate: new Date().toISOString().slice(0, 10),
       endDate: new Date().toISOString().slice(0, 10),
-      color: "#64748b",
+      color: colorForCategory(p?.category ?? ""),
       milestone: false,
       targetGoal: "",
       mandays: "",

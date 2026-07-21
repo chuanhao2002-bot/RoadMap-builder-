@@ -5,6 +5,7 @@ import { useFilteredProjects } from "@/lib/useFilteredProjects";
 import { useProjectStore } from "@/store/useProjectStore";
 import { computeYearLayout, daysBetween, groupBy } from "@/lib/timelineLayout";
 import { getAtRiskInfo } from "@/lib/dependencies";
+import { colorForCategory } from "@/lib/colorPalette";
 import type { Project } from "@/types/project";
 import { ExportMenu } from "./ExportMenu";
 
@@ -14,16 +15,6 @@ const GROUP_FIELDS: { key: keyof Project; label: string }[] = [
   { key: "owner", label: "Owner" },
   { key: "status", label: "Status" },
   { key: "priority", label: "Priority" },
-];
-
-const CATEGORY_DOT_COLORS = [
-  "#3b82f6",
-  "#a855f7",
-  "#f97316",
-  "#10b981",
-  "#ec4899",
-  "#06b6d4",
-  "#eab308",
 ];
 
 const MARQUEE_PAUSE_MS = 600;
@@ -248,7 +239,7 @@ export function TimelineRoadmap() {
             <tbody>
               {categoryNames.map((category, ci) => {
                 const group = groups[category];
-                const dotColor = CATEGORY_DOT_COLORS[ci % CATEGORY_DOT_COLORS.length];
+                const dotColor = colorForCategory(category);
                 return group.map((project, i) => {
                   const bar = barByProjectId.get(project.id);
                   return (
