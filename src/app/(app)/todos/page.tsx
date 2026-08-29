@@ -59,7 +59,7 @@ export default function TodosPage() {
         />
         <button
           onClick={addFromDraft}
-          className="flex items-center gap-1.5 rounded-md bg-neutral-900 dark:bg-white text-white dark:text-neutral-900 px-3 py-2 text-sm font-medium hover:opacity-90"
+          className="flex items-center gap-1.5 rounded-md bg-accent text-white px-3 py-2 text-sm font-medium hover:bg-accent-hover transition-colors active:scale-[0.98] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/50"
         >
           <Plus size={14} /> Add
         </button>
@@ -71,10 +71,10 @@ export default function TodosPage() {
             <button
               key={v}
               onClick={() => setView(v)}
-              className={`px-3 py-2 text-sm font-medium border-b-2 -mb-px capitalize ${
+              className={`px-3 py-2 text-sm font-medium border-b-2 -mb-px capitalize transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/50 ${
                 view === v
-                  ? "border-neutral-900 dark:border-white text-neutral-900 dark:text-white"
-                  : "border-transparent text-neutral-500 hover:text-neutral-700"
+                  ? "border-accent text-accent"
+                  : "border-transparent text-neutral-500 hover:text-neutral-700 dark:hover:text-neutral-300"
               }`}
             >
               {v}
@@ -88,11 +88,11 @@ export default function TodosPage() {
       </div>
 
       {selectedIds.length > 0 && (
-        <div className="flex flex-wrap items-center gap-2 rounded-lg border border-neutral-900 dark:border-white bg-neutral-50 dark:bg-neutral-900 px-3 py-2 text-sm">
+        <div className="flex flex-wrap items-center gap-2 rounded-lg border border-accent/30 bg-accent-subtle px-3 py-2 text-sm">
           <span className="font-medium">{selectedIds.length} selected</span>
           <button
             onClick={pushSelectedToRoadmap}
-            className="flex items-center gap-1 rounded-md bg-neutral-900 dark:bg-white text-white dark:text-neutral-900 px-2 py-1 text-sm font-medium"
+            className="flex items-center gap-1 rounded-md bg-accent text-white px-2 py-1 text-sm font-medium hover:bg-accent-hover transition-colors active:scale-[0.98] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/50"
           >
             <ArrowRightCircle size={14} /> Add selected to Roadmap
           </button>
@@ -165,7 +165,7 @@ function MatrixView({ todos, updateTodo, removeTodo, selectedIds, toggleSelect }
             onDrop={(e) => handleDrop(q.key, e)}
             className={`rounded-lg border p-3 space-y-2 min-h-[160px] transition-colors ${
               dragOver === q.key
-                ? "border-neutral-900 dark:border-white bg-neutral-50 dark:bg-neutral-900"
+                ? "border-accent bg-accent-subtle"
                 : "border-neutral-200 dark:border-neutral-800"
             }`}
           >
@@ -242,14 +242,16 @@ function TodoCard({
         <button
           onClick={() => sendTodoToRoadmap(todo)}
           title="Add to Roadmap"
-          className="ml-auto flex items-center gap-1 text-xs text-neutral-500 hover:text-neutral-900 dark:hover:text-white"
+          aria-label="Add to Roadmap"
+          className="ml-auto flex items-center gap-1 text-xs text-neutral-500 hover:text-accent transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/50 rounded"
         >
           <ArrowRightCircle size={13} /> Roadmap
         </button>
         <button
           onClick={() => removeTodo(todo.id)}
           title="Delete"
-          className="text-neutral-400 hover:text-red-600"
+          aria-label="Delete task"
+          className="text-neutral-400 hover:text-red-600 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red-500/50 rounded"
         >
           <Trash2 size={13} />
         </button>
@@ -327,14 +329,16 @@ function ListView({ todos, updateTodo, removeTodo, selectedIds, toggleSelect }: 
                   <button
                     onClick={() => sendTodoToRoadmap(t)}
                     title="Add to Roadmap"
-                    className="p-1 text-neutral-400 hover:text-neutral-800 dark:hover:text-white"
+                    aria-label="Add to Roadmap"
+                    className="p-1 text-neutral-400 hover:text-accent transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/50 rounded"
                   >
                     <ArrowRightCircle size={15} />
                   </button>
                   <button
                     onClick={() => removeTodo(t.id)}
                     title="Delete"
-                    className="p-1 text-neutral-400 hover:text-red-600"
+                    aria-label="Delete task"
+                    className="p-1 text-neutral-400 hover:text-red-600 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red-500/50 rounded"
                   >
                     <Trash2 size={15} />
                   </button>

@@ -70,10 +70,10 @@ export function FilterBar() {
         {savedViews.map((v) => (
           <span
             key={v.id}
-            className={`flex items-center gap-1 rounded-full px-3 py-1 text-xs cursor-pointer ${
+            className={`flex items-center gap-1 rounded-full px-3 py-1 text-xs cursor-pointer transition-colors ${
               activeSavedViewId === v.id
-                ? "bg-neutral-900 text-white dark:bg-white dark:text-neutral-900"
-                : "bg-neutral-100 dark:bg-neutral-900 text-neutral-700 dark:text-neutral-300"
+                ? "bg-accent text-white"
+                : "bg-neutral-100 dark:bg-neutral-900 text-neutral-700 dark:text-neutral-300 hover:bg-neutral-200 dark:hover:bg-neutral-800"
             }`}
             onClick={() => applySavedView(v.id)}
           >
@@ -101,7 +101,7 @@ export function FilterBar() {
               saveCurrentAsView(newViewName.trim());
               setNewViewName("");
             }}
-            className="rounded-md bg-neutral-900 text-white dark:bg-white dark:text-neutral-900 px-2 py-1 text-xs font-medium disabled:opacity-40"
+            className="rounded-md bg-accent text-white px-2 py-1 text-xs font-medium disabled:opacity-40 hover:bg-accent-hover transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/50"
           >
             Save view
           </button>
@@ -127,10 +127,10 @@ function MultiSelect<T extends string>({
     <div className="relative">
       <button
         onClick={() => setOpen((o) => !o)}
-        className={`rounded-md border px-2 py-1.5 text-sm ${
+        className={`rounded-md border px-2 py-1.5 text-sm transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/50 ${
           selected.length
-            ? "border-neutral-900 dark:border-white"
-            : "border-neutral-300 dark:border-neutral-700"
+            ? "border-accent text-accent"
+            : "border-neutral-300 dark:border-neutral-700 hover:border-neutral-400 dark:hover:border-neutral-600"
         }`}
       >
         {label}

@@ -116,7 +116,7 @@ export function AuthForm({ title, subtitle }: { title: string; subtitle: string 
           <button
             onClick={signIn}
             disabled={busy || !email.trim() || !password}
-            className="w-full rounded-md bg-neutral-900 dark:bg-white text-white dark:text-neutral-900 px-3 py-2 text-sm font-medium hover:opacity-90 disabled:opacity-50"
+            className="w-full rounded-md bg-accent text-white px-3 py-2 text-sm font-medium hover:bg-accent-hover disabled:opacity-50 transition-colors active:scale-[0.98] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/50"
           >
             {busy ? "Please wait…" : "Sign in"}
           </button>
@@ -132,7 +132,7 @@ export function AuthForm({ title, subtitle }: { title: string; subtitle: string 
         <button
           onClick={sendMagic}
           disabled={busy || !email.trim()}
-          className="w-full rounded-md bg-neutral-900 dark:bg-white text-white dark:text-neutral-900 px-3 py-2 text-sm font-medium hover:opacity-90 disabled:opacity-50"
+          className="w-full rounded-md bg-accent text-white px-3 py-2 text-sm font-medium hover:bg-accent-hover disabled:opacity-50 transition-colors active:scale-[0.98] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/50"
         >
           {busy ? "Sending…" : "Send magic link"}
         </button>

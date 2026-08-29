@@ -103,7 +103,7 @@ export default function SettingsPage() {
           <button
             onClick={handleInvite}
             disabled={invitingBusy || !currentWorkspaceId}
-            className="flex items-center gap-1.5 rounded-md bg-neutral-900 dark:bg-white text-white dark:text-neutral-900 px-3 py-1.5 text-sm font-medium hover:opacity-90 disabled:opacity-50"
+            className="flex items-center gap-1.5 rounded-md bg-accent text-white px-3 py-1.5 text-sm font-medium hover:bg-accent-hover disabled:opacity-50 transition-colors active:scale-[0.98] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/50"
           >
             <UserPlus size={14} /> {invitingBusy ? "Creating..." : "Create invite link"}
           </button>
@@ -139,7 +139,7 @@ export default function SettingsPage() {
           <button
             onClick={handleCreate}
             disabled={creating}
-            className="flex items-center gap-1.5 rounded-md bg-neutral-900 dark:bg-white text-white dark:text-neutral-900 px-3 py-1.5 text-sm font-medium hover:opacity-90 disabled:opacity-50"
+            className="flex items-center gap-1.5 rounded-md bg-accent text-white px-3 py-1.5 text-sm font-medium hover:bg-accent-hover disabled:opacity-50 transition-colors active:scale-[0.98] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/50"
           >
             <Link2 size={14} /> {creating ? "Creating..." : "Create link"}
           </button>
@@ -206,7 +206,7 @@ function RenameWorkspace({
         <button
           onClick={handleRename}
           disabled={renaming || !workspaceName.trim() || workspaceName.trim() === initialName}
-          className="flex items-center gap-1.5 rounded-md bg-neutral-900 dark:bg-white text-white dark:text-neutral-900 px-3 py-1.5 text-sm font-medium hover:opacity-90 disabled:opacity-50"
+          className="flex items-center gap-1.5 rounded-md bg-accent text-white px-3 py-1.5 text-sm font-medium hover:bg-accent-hover disabled:opacity-50 transition-colors active:scale-[0.98] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/50"
         >
           {renamed ? <Check size={14} /> : <Pencil size={14} />} {renaming ? "Saving..." : renamed ? "Saved" : "Rename"}
         </button>

@@ -39,7 +39,7 @@ export function KanbanBoard() {
             onDrop={(e) => handleDrop(status, e)}
             className={`flex-1 min-w-[220px] rounded-lg border p-3 space-y-2 transition-colors ${
               dragOverColumn === status
-                ? "border-neutral-900 dark:border-white bg-neutral-50 dark:bg-neutral-900"
+                ? "border-accent bg-accent-subtle"
                 : "border-neutral-200 dark:border-neutral-800"
             }`}
           >

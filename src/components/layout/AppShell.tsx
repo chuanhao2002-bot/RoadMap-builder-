@@ -17,7 +17,8 @@ export function AppShell({ children }: { children: React.ReactNode }) {
           <button
             onClick={toggle}
             title="Show sidebar"
-            className="mb-4 p-1.5 rounded-md text-neutral-400 hover:text-neutral-700 hover:bg-neutral-100 dark:hover:bg-neutral-900 dark:hover:text-neutral-200"
+            aria-label="Show sidebar"
+            className="mb-4 p-1.5 rounded-md text-neutral-400 hover:text-neutral-700 hover:bg-neutral-100 dark:hover:bg-neutral-900 dark:hover:text-neutral-200 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/50"
           >
             <PanelLeftOpen size={18} />
           </button>

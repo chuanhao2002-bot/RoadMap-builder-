@@ -58,19 +58,19 @@ export function ProjectSheet() {
         />
         <button
           onClick={() => fileInputRef.current?.click()}
-          className="flex items-center gap-1.5 rounded-md border border-neutral-300 dark:border-neutral-700 px-3 py-1.5 text-sm font-medium hover:bg-neutral-50 dark:hover:bg-neutral-900"
+          className="flex items-center gap-1.5 rounded-md border border-neutral-300 dark:border-neutral-700 px-3 py-1.5 text-sm font-medium hover:bg-neutral-50 dark:hover:bg-neutral-900 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/50"
         >
           <Upload size={14} /> Import CSV
         </button>
         <button
           onClick={() => exportProjectsAsCsv(projects)}
-          className="flex items-center gap-1.5 rounded-md bg-neutral-900 dark:bg-white text-white dark:text-neutral-900 px-3 py-1.5 text-sm font-medium hover:opacity-90"
+          className="flex items-center gap-1.5 rounded-md bg-accent text-white px-3 py-1.5 text-sm font-medium hover:bg-accent-hover transition-colors active:scale-[0.98] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/50"
         >
           <Download size={14} /> Export CSV
         </button>
       </div>
       {selectedIds.length > 0 && (
-        <div className="flex flex-wrap items-center gap-2 rounded-lg border border-neutral-900 dark:border-white bg-neutral-50 dark:bg-neutral-900 px-3 py-2 text-sm">
+        <div className="flex flex-wrap items-center gap-2 rounded-lg border border-accent/30 bg-accent-subtle px-3 py-2 text-sm">
           <span className="font-medium">{selectedIds.length} selected</span>
           <select
             defaultValue=""
@@ -118,7 +118,7 @@ export function ProjectSheet() {
           />
           <button
             onClick={bulkDelete}
-            className="flex items-center gap-1 rounded-md px-2 py-1 text-sm text-red-600 hover:bg-red-50 dark:hover:bg-red-950/40"
+            className="flex items-center gap-1 rounded-md px-2 py-1 text-sm text-red-600 hover:bg-red-50 dark:hover:bg-red-950/40 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red-500/50"
           >
             <Trash2 size={14} /> Delete
           </button>
@@ -221,9 +221,9 @@ export function ProjectSheet() {
                     max={100}
                     value={p.progress}
                     onChange={(e) => updateProject(p.id, { progress: Number(e.target.value) })}
-                    className="w-16"
+                    className="w-16 accent-accent"
                   />
-                  <span className="text-xs text-neutral-500 w-8 text-right">{p.progress}%</span>
+                  <span className="text-xs text-neutral-500 w-8 text-right tabular-nums">{p.progress}%</span>
                 </div>
               </td>
               <DependsOnCell
@@ -232,10 +232,20 @@ export function ProjectSheet() {
                 onChange={(ids) => updateProject(p.id, { dependsOn: ids })}
               />
               <td className="px-2 py-1 whitespace-nowrap">
-                <button onClick={() => duplicateProject(p.id)} className="p-1 text-neutral-400 hover:text-neutral-700">
+                <button
+                  onClick={() => duplicateProject(p.id)}
+                  title="Duplicate row"
+                  aria-label="Duplicate row"
+                  className="p-1 text-neutral-400 hover:text-neutral-700 dark:hover:text-neutral-200 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/50 rounded"
+                >
                   <Copy size={14} />
                 </button>
-                <button onClick={() => removeProject(p.id)} className="p-1 text-neutral-400 hover:text-red-600">
+                <button
+                  onClick={() => removeProject(p.id)}
+                  title="Delete row"
+                  aria-label="Delete row"
+                  className="p-1 text-neutral-400 hover:text-red-600 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red-500/50 rounded"
+                >
                   <Trash2 size={14} />
                 </button>
               </td>
@@ -260,7 +270,7 @@ function Cell({ value, onChange }: { value: string; onChange: (v: string) => voi
       <input
         value={value}
         onChange={(e) => onChange(e.target.value)}
-        className="w-full bg-transparent outline-none min-w-[8rem]"
+        className="w-full bg-transparent outline-none min-w-[8rem] rounded px-1 -mx-1 focus:ring-2 focus:ring-accent/40 transition-shadow"
       />
     </td>
   );
@@ -283,7 +293,7 @@ function WrapCell({ value, onChange }: { value: string; onChange: (v: string) =>
           }
         }}
         rows={1}
-        className="w-full bg-transparent outline-none resize-none whitespace-pre-wrap break-words min-w-[10rem] leading-snug"
+        className="w-full bg-transparent outline-none resize-none whitespace-pre-wrap break-words min-w-[10rem] leading-snug rounded px-1 -mx-1 focus:ring-2 focus:ring-accent/40 transition-shadow"
       />
     </td>
   );

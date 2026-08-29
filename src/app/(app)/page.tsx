@@ -5,9 +5,8 @@ import { useMemo } from "react";
 import { useProjectStore } from "@/store/useProjectStore";
 import { STATUSES, PRIORITIES } from "@/lib/projectOptions";
 import { getAllAtRisk } from "@/lib/dependencies";
+import { COLOR_PALETTE } from "@/lib/colorPalette";
 import type { Project } from "@/types/project";
-
-const PALETTE = ["#3b82f6", "#a855f7", "#f97316", "#10b981", "#ec4899", "#06b6d4", "#eab308", "#ef4444"];
 
 function daysUntil(dateStr: string): number | null {
   if (!dateStr) return null;
@@ -105,10 +104,16 @@ export default function Dashboard() {
       </div>
 
       <div className="flex gap-3">
-        <Link href="/projects" className="rounded-md bg-neutral-900 text-white dark:bg-white dark:text-neutral-900 px-4 py-2 text-sm font-medium">
+        <Link
+          href="/projects"
+          className="rounded-md bg-accent text-white px-4 py-2 text-sm font-medium hover:bg-accent-hover transition-colors active:scale-[0.98] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/50"
+        >
           Open Spreadsheet
         </Link>
-        <Link href="/views" className="rounded-md border border-neutral-300 dark:border-neutral-700 px-4 py-2 text-sm font-medium">
+        <Link
+          href="/views"
+          className="rounded-md border border-neutral-300 dark:border-neutral-700 px-4 py-2 text-sm font-medium hover:border-neutral-400 dark:hover:border-neutral-600 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/50"
+        >
           View Roadmap
         </Link>
       </div>
@@ -174,8 +179,8 @@ export default function Dashboard() {
 
 function Stat({ label, value }: { label: string; value: number | string }) {
   return (
-    <div className="rounded-lg border border-neutral-200 dark:border-neutral-800 p-4">
-      <div className="text-2xl font-semibold">{value}</div>
+    <div className="rounded-lg border border-neutral-200 dark:border-neutral-800 p-4 transition-colors hover:border-neutral-300 dark:hover:border-neutral-700">
+      <div className="text-2xl font-semibold tabular-nums">{value}</div>
       <div className="text-xs text-neutral-500 mt-1">{label}</div>
     </div>
   );
@@ -196,10 +201,10 @@ function BarPanel({ title, data, total }: { title: string; data: readonly (reado
               <div className="flex-1 h-2 rounded-full bg-neutral-100 dark:bg-neutral-900 overflow-hidden">
                 <div
                   className="h-full rounded-full"
-                  style={{ width: `${(count / max) * 100}%`, background: PALETTE[i % PALETTE.length] }}
+                  style={{ width: `${(count / max) * 100}%`, background: COLOR_PALETTE[i % COLOR_PALETTE.length] }}
                 />
               </div>
-              <span className="w-6 shrink-0 text-right text-xs text-neutral-500">{count}</span>
+              <span className="w-6 shrink-0 text-right text-xs text-neutral-500 tabular-nums">{count}</span>
             </div>
           ))}
         </div>
@@ -230,7 +235,7 @@ function ListPanel({
                 <span className="w-2 h-2 rounded-full shrink-0" style={{ background: item.color }} />
                 <span className="truncate">{item.primary}</span>
               </span>
-              <span className={`shrink-0 text-xs font-medium ${item.danger ? "text-red-500" : "text-neutral-500"}`}>
+              <span className={`shrink-0 text-xs font-medium tabular-nums ${item.danger ? "text-red-500" : "text-neutral-500"}`}>
                 {item.secondary}
               </span>
             </li>

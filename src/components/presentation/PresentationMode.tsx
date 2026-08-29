@@ -93,9 +93,9 @@ export function PresentationMode() {
             <button
               key={v.id}
               onClick={() => setView(v.id)}
-              className={`px-3 py-1.5 rounded-md text-sm font-medium ${
+              className={`px-3 py-1.5 rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/50 ${
                 view === v.id
-                  ? "bg-neutral-900 text-white dark:bg-white dark:text-neutral-900"
+                  ? "bg-accent text-white"
                   : "text-neutral-500 hover:text-neutral-800 dark:hover:text-neutral-200"
               }`}
             >
@@ -106,22 +106,25 @@ export function PresentationMode() {
         <div className="flex items-center gap-2">
           <button
             onClick={() => setDark((d) => !d)}
-            className="p-2 rounded-md text-neutral-500 hover:text-neutral-800 dark:hover:text-neutral-200"
+            className="p-2 rounded-md text-neutral-500 hover:text-neutral-800 dark:hover:text-neutral-200 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/50"
             title="Toggle dark mode"
+            aria-label="Toggle dark mode"
           >
             {dark ? <Sun size={16} /> : <Moon size={16} />}
           </button>
           <button
             onClick={toggleFullscreen}
-            className="p-2 rounded-md text-neutral-500 hover:text-neutral-800 dark:hover:text-neutral-200"
+            className="p-2 rounded-md text-neutral-500 hover:text-neutral-800 dark:hover:text-neutral-200 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/50"
             title="Toggle fullscreen (f)"
+            aria-label="Toggle fullscreen"
           >
             {isFullscreen ? <Minimize size={16} /> : <Maximize size={16} />}
           </button>
           <button
             onClick={exit}
-            className="p-2 rounded-md text-neutral-500 hover:text-red-600"
+            className="p-2 rounded-md text-neutral-500 hover:text-red-600 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/50"
             title="Exit presentation (Esc)"
+            aria-label="Exit presentation"
           >
             <X size={16} />
           </button>

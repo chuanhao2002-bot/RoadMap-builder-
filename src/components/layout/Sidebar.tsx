@@ -31,26 +31,28 @@ export function Sidebar({ onCollapse }: { onCollapse: () => void }) {
         <button
           onClick={onCollapse}
           title="Hide sidebar"
-          className="p-1 rounded-md text-neutral-400 hover:text-neutral-700 hover:bg-neutral-100 dark:hover:bg-neutral-900 dark:hover:text-neutral-200"
+          aria-label="Hide sidebar"
+          className="p-1 rounded-md text-neutral-400 hover:text-neutral-700 hover:bg-neutral-100 dark:hover:bg-neutral-900 dark:hover:text-neutral-200 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/50"
         >
           <PanelLeftClose size={16} />
         </button>
       </div>
       <WorkspaceSwitcher />
-      <div className="space-y-1">
+      <div className="space-y-0.5">
         {NAV.map(({ href, label, icon: Icon }) => {
           const active = pathname === href;
           return (
             <Link
               key={href}
               href={href}
-              className={`flex items-center gap-2 rounded-md px-3 py-2 text-sm ${
+              aria-current={active ? "page" : undefined}
+              className={`flex items-center gap-2 rounded-md px-3 py-2 text-sm transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/50 ${
                 active
-                  ? "bg-neutral-900 text-white dark:bg-white dark:text-neutral-900"
+                  ? "bg-accent-subtle text-accent font-medium"
                   : "text-neutral-600 dark:text-neutral-300 hover:bg-neutral-100 dark:hover:bg-neutral-900"
               }`}
             >
-              <Icon size={16} />
+              <Icon size={16} className={active ? "text-accent" : ""} />
               {label}
             </Link>
           );
@@ -60,7 +62,7 @@ export function Sidebar({ onCollapse }: { onCollapse: () => void }) {
         {user && <div className="px-2 text-xs text-neutral-400 truncate">{user.email}</div>}
         <button
           onClick={handleSignOut}
-          className="flex items-center gap-2 w-full rounded-md px-3 py-2 text-sm text-neutral-600 dark:text-neutral-300 hover:bg-neutral-100 dark:hover:bg-neutral-900"
+          className="flex items-center gap-2 w-full rounded-md px-3 py-2 text-sm text-neutral-600 dark:text-neutral-300 hover:bg-neutral-100 dark:hover:bg-neutral-900 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/50"
         >
           <LogOut size={16} />
           Sign out

@@ -1,13 +1,22 @@
 @import "tailwindcss";
 
 :root {
-  --background: #ffffff;
+  --background: #fafafa;
   --foreground: #171717;
+  /* Single UI accent (Linear-style desaturated lavender-blue) — used for
+     primary actions, active nav state, links, and focus rings. Data-series
+     colors (project categories) are a separate system: src/lib/colorPalette.ts */
+  --color-accent: #5e6ad2;
+  --color-accent-hover: #4f5ac4;
+  --color-accent-subtle: #eef0fd;
 }
 
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
+  --color-accent: var(--color-accent);
+  --color-accent-hover: var(--color-accent-hover);
+  --color-accent-subtle: var(--color-accent-subtle);
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
 }
@@ -16,11 +25,22 @@
   :root {
     --background: #0a0a0a;
     --foreground: #ededed;
+    --color-accent: #7b85e8;
+    --color-accent-hover: #929bee;
+    --color-accent-subtle: #1c1e33;
   }
 }
 
 body {
   background: var(--background);
   color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+}
+
+* {
+  scroll-behavior: smooth;
+}
+
+::selection {
+  background: var(--color-accent-subtle);
+  color: var(--color-accent);
 }
