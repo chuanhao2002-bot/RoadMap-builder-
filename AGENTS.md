@@ -114,3 +114,44 @@ across environments (see `src/lib/siteUrl.ts`).
   `loaded && workspaceId` match, opens a realtime channel filtered to that
   workspace, and `reset()` tears it down on sign-out. Follow this pattern
   for any new workspace-scoped data type rather than inventing a new one.
+
+## UI/design tooling
+
+Installed for redesign/polish work — not needed for ordinary feature work.
+
+- **Design skills** (`Leonxlnx/taste-skill`, 13 skills, tracked in
+  `skills-lock.json` / `.claude/skills/`): generation-oriented, push toward
+  "doesn't look like generic AI output." Reach for `redesign-existing-projects`
+  first — it audits current UI for generic-AI patterns and upgrades it in
+  place without breaking functionality. Others target specific looks
+  (`minimalist-ui`, `industrial-brutalist-ui`), motion/UX rigor (`gpt-taste`),
+  image-to-code, and brand-kit generation. Third-party, individually
+  authored, unaudited — reviewed for embedded scripts/exfiltration patterns
+  before installing (clean), but review `SKILL.md` yourself before leaning on
+  one heavily for anything sensitive.
+- **Auditor skill** (`vercel-labs/agent-skills` → `web-design-guidelines`):
+  a checker, not a generator. "Review my UI" / "audit accessibility" fetches
+  Vercel's interface guidelines and flags violations file:line. From a known
+  org (Vercel), still flagged "Med Risk" by Snyk as an unaudited third-party
+  skill — not malicious, just not vetted by Snyk.
+- **Style references** (`design-references/awesome-design-md/`): not a
+  skill, 149 real design-system docs (Stripe, Apple, Airbnb, etc.) copied in
+  from `voltagent/awesome-design-md`. Ask for "make this look like Stripe"
+  and the relevant file gets read directly.
+- **`@playwright/cli`** (devDependency): CLI for an agent to drive a real
+  browser — navigate, screenshot, snapshot the DOM — useful for visually
+  verifying redesign changes instead of just trusting `npm run build`.
+  **Known gap**: in this project's usual remote/sandboxed dev environment,
+  `playwright-cli open` defaults to the `chrome` channel and fails
+  (`Chromium distribution 'chrome' is not found at /opt/google/chrome/chrome`)
+  because only a bundled Chromium is preinstalled there, not real Chrome, and
+  a `.playwright/cli.config.json` `launchOptions.executablePath` override was
+  tried and did **not** get picked up. Workaround that's proven to work in
+  that environment: skip `playwright-cli` and drive `playwright-core`
+  directly from a throwaway Node script with
+  `chromium.launch({ executablePath: '/opt/pw-browsers/chromium-*/chrome-linux/chrome' })`
+  (see git history around the auth-form rewrite and the login-screen
+  screenshot for a working example). On a machine with real Chrome/Chromium
+  properly installed (e.g. a local Mac), `playwright-cli` should work
+  directly with no workaround needed — this gap is sandbox-specific, not a
+  bug in the tool itself; worth re-testing there before assuming it's broken.
